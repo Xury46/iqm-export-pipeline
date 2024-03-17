@@ -8,7 +8,12 @@ bl_info = {
     "category" : "Import-Export",
 }
 
-from . import iqm_export_pipeline
+# Import / reload local modules (Required when using the "Reload Scripts" (bpy.ops.scripts.reload()) operator in Blender
+if "iqm_export_pipeline" in locals():
+    import importlib
+    importlib.reload(iqm_export_pipeline)
+else:
+    from . import iqm_export_pipeline
 
 def register():
     iqm_export_pipeline.register()
