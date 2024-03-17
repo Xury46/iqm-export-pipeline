@@ -39,8 +39,29 @@ class IQMExportPipeline_Settings(bpy.types.PropertyGroup):
     file_name :        bpy.props.StringProperty(name = "File Name",   subtype='FILE_NAME', default = "ExampleFile")
     animation_list :   bpy.props.StringProperty(name = "Animations",  default = "idle::::1, walk::::1, run::::1")
 
+class IQMExportPipeline_Panel(bpy.types.Panel):
+    """Creates a panel in the Output section of the Properties Editor"""
+    bl_label = "IQM Export Pipeline"
+    bl_idname = "PROPERTIES_PT_iqm_export_pipeline"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = 'output'
 
-classes = [IQMExportPipeline_Export, IQMExportPipeline_Settings]
+    def draw(self, context):
+        settings = context.scene.iqm_export_pipeline_settings
+
+        layout = self.layout
+        row = layout.row()
+        row.prop(settings, "export_directory")
+        row = layout.row()
+        row.prop(settings, "file_name")
+        row = layout.row()
+        row.prop(settings, "animation_list")
+        row = layout.row()
+        row.operator("export.iqm_pipeline", text="Export")
+
+
+classes = [IQMExportPipeline_Export, IQMExportPipeline_Settings, IQMExportPipeline_Panel]
 
 def register():
     for class_to_register in classes:
