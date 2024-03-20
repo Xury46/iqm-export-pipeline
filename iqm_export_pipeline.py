@@ -35,9 +35,11 @@ class IQMExportPipeline_Export(bpy.types.Operator):
 
 class IQMExportPipeline_Settings(bpy.types.PropertyGroup):
     """Properties to for exporting via the IQM Export Pipeline"""
-    export_directory : bpy.props.StringProperty(name = "Output Path", subtype='DIR_PATH',  default = "/tmp\\")
-    file_name :        bpy.props.StringProperty(name = "File Name",   subtype='FILE_NAME', default = "ExampleFile")
-    animation_list :   bpy.props.StringProperty(name = "Animations",  default = "idle::::1, walk::::1, run::::1")
+    export_directory: bpy.props.StringProperty(name="Output Path", subtype='DIR_PATH',  default="/tmp\\")
+
+    file_name: bpy.props.StringProperty(name="File Name", subtype='FILE_NAME', default="ExampleFile")
+
+    animation_list: bpy.props.StringProperty(name="Animations",  default="idle::::1, walk::::1, run::::1")
 
 class IQMExportPipeline_Panel(bpy.types.Panel):
     """Creates a panel in the Output section of the Properties Editor"""
