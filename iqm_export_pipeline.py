@@ -18,6 +18,16 @@ class IQMExportPipeline_Export(bpy.types.Operator):
             animations_to_export = ""
         elif settings.action_list_source == 'string':
             animations_to_export = settings.action_list_string
+        elif settings.action_list_source == 'action_list':
+            action_names = []
+            for action_item in context.active_object.data.action_items:
+                action_names.append(action_item.action.name)
+
+            animations_to_export = ""
+            for i, action_name in enumerate(action_names):
+                animations_to_export += f"{action_name}::::1"
+                if i < len(action_names) - 1:
+                    animations_to_export += ", "
 
         print(f"Actions to export: {animations_to_export}")
 
@@ -49,7 +59,8 @@ class IQMExportPipeline_Settings(bpy.types.PropertyGroup):
         description="What source should provide the list of actions to export",
         items=[
             ('none', 'None', "Don't export an action list", 0, 0),
-            ('string', 'String', "Use a string to manually type an action list", 0, 1)
+            ('string', 'String', "Use a string to manually type an action list", 0, 1),
+            ('action_list', 'Action List', "Use a UI list of actions to generate the action list", 0, 2)
             ]
         )
 
@@ -78,6 +89,27 @@ class IQMExportPipeline_Panel(bpy.types.Panel):
         if settings.action_list_source == 'string':
             row = layout.row()
             row.prop(settings, "action_list_string")
+        elif settings.action_list_source == 'action_list':
+            row = layout.row()
+            active_object = context.view_layer.objects.active
+            if active_object.type == 'ARMATURE':
+                # The left column, containing the list.
+                col = row.column(align=True)
+
+                col.template_list(
+                    listtype_name ="UI_UL_ActionItemList",
+                    list_id = "DATA_UL_actions",
+                    dataptr = active_object.data,
+                    propname = "action_items",
+                    active_dataptr = active_object.data,
+                    active_propname = "active_action_item_index")
+
+                # The right column, containing the controls.
+                col = row.column(align=True)
+                col.operator("action_items.list_add", text="", icon="ADD")
+                col.operator("action_items.list_remove", text="", icon="REMOVE")
+            else:
+                row.label(text="Active object must be an Armature", icon="ERROR")
 
         row = layout.row()
         row.operator("export.iqm_pipeline", text="Export")
