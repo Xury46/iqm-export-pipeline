@@ -18,13 +18,14 @@ class IQMExportPipeline_Export(bpy.types.Operator):
         if settings.action_list_source == 'string':
             animations_to_export = settings.action_list_string
         elif settings.action_list_source == 'action_list':
-            action_names = []
-            for action_item in context.active_object.data.action_items:
-                action_names.append(action_item.action.name)
 
-            for i, action_name in enumerate(action_names):
-                animations_to_export += f"{action_name}::::1"
-                if i < len(action_names) - 1:
+            action_items = context.active_object.data.action_items
+            for i, action_item in enumerate(action_items):
+                name: str = action_item.action.name
+                looping: str = "1" if action_item.looping else "0"
+
+                animations_to_export += f"{name}::::{looping}"
+                if i < len(action_items) - 1:
                     animations_to_export += ", "
 
         print(f"Actions to export: {animations_to_export}")
