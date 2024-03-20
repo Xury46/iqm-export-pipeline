@@ -22,7 +22,43 @@ class ACTIONITEMS_UL_ActionItemList(bpy.types.UIList):
             layout.alignment = 'CENTER'
             layout.label(text="")
 
-classes = [ACTIONITEMS_ActionItem, ACTIONITEMS_UL_ActionItemList]
+class ACTIONITEMS_OT_List_Add(bpy.types.Operator):
+    """Add an ActionItem to the ActionItemList"""
+    bl_idname = "action_items.list_add"
+    bl_label = "Add"
+    bl_description = "Add an action to the list."
+
+    @classmethod
+    def poll(cls, context):
+        return context.active_object.type == 'ARMATURE'
+
+    def execute(self, context):
+        armature = context.active_object.data
+        armature.action_items.add()
+        return {'FINISHED'}
+
+class ACTIONITEMS_OT_List_Remove(bpy.types.Operator):
+    """Remove an ActionItem from the ActionItemList"""
+    bl_idname = "action_items.list_remove"
+    bl_label = "Remove"
+    bl_description = "Remove an action from the list."
+
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+
+        return (obj.type == 'ARMATURE'
+                and obj.data.action_items
+                and len(obj.data.action_items))
+
+    def execute(self, context):
+        armature = context.active_object.data
+        index = armature.active_action_item_index
+        armature.action_items.remove(index)
+        armature.active_action_item_index = min(max(0, index - 1), len(armature.action_items) - 1)
+        return {'FINISHED'}
+
+classes = [ACTIONITEMS_ActionItem, ACTIONITEMS_UL_ActionItemList, ACTIONITEMS_OT_List_Add, ACTIONITEMS_OT_List_Remove]
 
 def register():
     for class_to_register in classes:
