@@ -74,6 +74,3 @@ def unregister():
         bpy.utils.unregister_class(class_to_unregister)
 
     del bpy.types.Scene.iqm_export_pipeline_settings
-
-if __name__ == "__main__":
-    register()
