@@ -12,16 +12,20 @@ bl_info = {
 if "bpy" in locals():
     import importlib
     importlib.reload(iqm_export_pipeline)
+    importlib.reload(action_items_ui_list)
 else:
     from . import iqm_export_pipeline
+    from . import action_items_ui_list
 
 import bpy
 
 def register():
     iqm_export_pipeline.register()
+    action_items_ui_list.register()
 
 def unregister():
     iqm_export_pipeline.unregister()
+    action_items_ui_list.unregister()
 
 if __name__ == "__main__":
     register()
