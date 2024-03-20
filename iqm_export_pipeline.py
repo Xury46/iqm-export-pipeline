@@ -90,7 +90,7 @@ class IQMExportPipeline_Panel(bpy.types.Panel):
         elif settings.action_list_source == 'action_list':
             row = layout.row()
             active_object = context.view_layer.objects.active
-            if active_object.type == 'ARMATURE':
+            if active_object and active_object.type == 'ARMATURE':
                 # The left column, containing the list.
                 col = row.column(align=True)
 
