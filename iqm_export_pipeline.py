@@ -14,7 +14,12 @@ class IQMExportPipeline_Export(bpy.types.Operator):
         file_name = settings.file_name
         file_extention = ".iqm"
 
-        animations_to_export = settings.animation_list
+        if settings.action_list_source == 'none':
+            animations_to_export = ""
+        elif settings.action_list_source == 'string':
+            animations_to_export = settings.action_list_string
+
+        print(f"Actions to export: {animations_to_export}")
 
         exportIQM(
             context = bpy.context,
@@ -35,9 +40,20 @@ class IQMExportPipeline_Export(bpy.types.Operator):
 
 class IQMExportPipeline_Settings(bpy.types.PropertyGroup):
     """Properties to for exporting via the IQM Export Pipeline"""
-    export_directory : bpy.props.StringProperty(name = "Output Path", subtype='DIR_PATH',  default = "/tmp\\")
-    file_name :        bpy.props.StringProperty(name = "File Name",   subtype='FILE_NAME', default = "ExampleFile")
-    animation_list :   bpy.props.StringProperty(name = "Animations",  default = "idle::::1, walk::::1, run::::1")
+    export_directory: bpy.props.StringProperty(name="Output Path", subtype='DIR_PATH',  default="/tmp\\")
+
+    file_name: bpy.props.StringProperty(name="File Name", subtype='FILE_NAME', default="ExampleFile")
+
+    action_list_source: bpy.props.EnumProperty(
+        name="Action List Source",
+        description="What source should provide the list of actions to export",
+        items=[
+            ('none', 'None', "Don't export an action list", 0, 0),
+            ('string', 'String', "Use a string to manually type an action list", 0, 1)
+            ]
+        )
+
+    action_list_string: bpy.props.StringProperty(name="Animations",  default="idle::::1, walk::::1, run::::1")
 
 class IQMExportPipeline_Panel(bpy.types.Panel):
     """Creates a panel in the Output section of the Properties Editor"""
@@ -55,8 +71,14 @@ class IQMExportPipeline_Panel(bpy.types.Panel):
         row.prop(settings, "export_directory")
         row = layout.row()
         row.prop(settings, "file_name")
-        row = layout.row()
-        row.prop(settings, "animation_list")
+        row = layout.row(align=True)
+        row.label(text="Action list source:")
+        row.prop(settings, "action_list_source", text="Action list source", expand=True)
+
+        if settings.action_list_source == 'string':
+            row = layout.row()
+            row.prop(settings, "action_list_string")
+
         row = layout.row()
         row.operator("export.iqm_pipeline", text="Export")
 
