@@ -14,7 +14,7 @@ class IQMExportPipeline_Export(bpy.types.Operator):
         file_name = settings.file_name
         file_extention = ".iqm"
 
-        animations_to_export = settings.animation_list
+        animations_to_export = settings.action_list_string
 
         exportIQM(
             context = bpy.context,
@@ -39,7 +39,7 @@ class IQMExportPipeline_Settings(bpy.types.PropertyGroup):
 
     file_name: bpy.props.StringProperty(name="File Name", subtype='FILE_NAME', default="ExampleFile")
 
-    animation_list: bpy.props.StringProperty(name="Animations",  default="idle::::1, walk::::1, run::::1")
+    action_list_string: bpy.props.StringProperty(name="Animations",  default="idle::::1, walk::::1, run::::1")
 
 class IQMExportPipeline_Panel(bpy.types.Panel):
     """Creates a panel in the Output section of the Properties Editor"""
@@ -58,7 +58,7 @@ class IQMExportPipeline_Panel(bpy.types.Panel):
         row = layout.row()
         row.prop(settings, "file_name")
         row = layout.row()
-        row.prop(settings, "animation_list")
+        row.prop(settings, "action_list_string")
         row = layout.row()
         row.operator("export.iqm_pipeline", text="Export")
 
