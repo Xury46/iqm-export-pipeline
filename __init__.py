@@ -9,11 +9,13 @@ bl_info = {
 }
 
 # Import / reload local modules (Required when using the "Reload Scripts" (bpy.ops.scripts.reload()) operator in Blender
-if "iqm_export_pipeline" in locals():
+if "bpy" in locals():
     import importlib
     importlib.reload(iqm_export_pipeline)
 else:
     from . import iqm_export_pipeline
+
+import bpy
 
 def register():
     iqm_export_pipeline.register()
