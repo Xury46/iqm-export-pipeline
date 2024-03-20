@@ -14,16 +14,14 @@ class IQMExportPipeline_Export(bpy.types.Operator):
         file_name = settings.file_name
         file_extention = ".iqm"
 
-        if settings.action_list_source == 'none':
-            animations_to_export = ""
-        elif settings.action_list_source == 'string':
+        animations_to_export = ""
+        if settings.action_list_source == 'string':
             animations_to_export = settings.action_list_string
         elif settings.action_list_source == 'action_list':
             action_names = []
             for action_item in context.active_object.data.action_items:
                 action_names.append(action_item.action.name)
 
-            animations_to_export = ""
             for i, action_name in enumerate(action_names):
                 animations_to_export += f"{action_name}::::1"
                 if i < len(action_names) - 1:
