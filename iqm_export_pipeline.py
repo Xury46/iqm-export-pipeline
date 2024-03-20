@@ -93,13 +93,21 @@ class IQMExportPipeline_Panel(bpy.types.Panel):
             row = layout.row()
             active_object = context.view_layer.objects.active
             if active_object.type == 'ARMATURE':
-                row.template_list(
+                # The left column, containing the list.
+                col = row.column(align=True)
+
+                col.template_list(
                     listtype_name ="UI_UL_ActionItemList",
                     list_id = "DATA_UL_actions",
                     dataptr = active_object.data,
                     propname = "action_items",
                     active_dataptr = active_object.data,
                     active_propname = "active_action_item_index")
+
+                # The right column, containing the controls.
+                col = row.column(align=True)
+                col.operator("action_items.list_add", text="", icon="ADD")
+                col.operator("action_items.list_remove", text="", icon="REMOVE")
             else:
                 row.label(text="Active object must be an Armature", icon="ERROR")
 
