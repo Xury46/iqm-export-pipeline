@@ -71,19 +71,19 @@ class IQMExportPipeline_Export(Operator):
         with context.temp_override(selected_objects=settings.export_collection.all_objects):
 
             exportIQM(
-                context = bpy.context,
-                filename = os.path.join(file_directory, file_name + file_extention),
-                usemesh = True,
-                usemods = True,
-                useskel = True,
-                usebbox = True,
-                usecol = False,
-                scale = 1.0,
-                animspecs = animations_to_export,
-                matfun = (lambda prefix, image: prefix),
-                derigify = False,
-                boneorder = None
-                )
+                context=bpy.context,
+                filename=os.path.join(file_directory, file_name + file_extention),
+                usemesh=True,
+                usemods=True,
+                useskel=True,
+                usebbox=True,
+                usecol=False,
+                scale=1.0,
+                animspecs=animations_to_export,
+                matfun=(lambda prefix, image: prefix),
+                derigify=False,
+                boneorder=None
+            )
 
         return {"FINISHED"}
 
@@ -144,12 +144,13 @@ class IQMExportPipeline_Panel(Panel):
                 col = row.column(align=True)
 
                 col.template_list(
-                    listtype_name ="UI_UL_ActionItemList",
-                    list_id = "DATA_UL_actions",
-                    dataptr = settings.armature_source,
-                    propname = "action_items",
-                    active_dataptr = settings.armature_source,
-                    active_propname = "active_action_item_index")
+                    listtype_name="UI_UL_ActionItemList",
+                    list_id="DATA_UL_actions",
+                    dataptr=settings.armature_source,
+                    propname="action_items",
+                    active_dataptr=settings.armature_source,
+                    active_propname="active_action_item_index"
+                )
 
                 # The right column, containing the controls.
                 col = row.column(align=True)
@@ -168,7 +169,7 @@ def register():
     for class_to_register in classes:
         bpy.utils.register_class(class_to_register)
 
-    Scene.iqm_export_pipeline_settings = PointerProperty(type = IQMExportPipeline_Settings)
+    Scene.iqm_export_pipeline_settings = PointerProperty(type=IQMExportPipeline_Settings)
 
 def unregister():
     for class_to_unregister in classes:
