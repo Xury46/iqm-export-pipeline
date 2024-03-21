@@ -62,10 +62,7 @@ class IQMExportPipeline_Export(Operator):
 
             action_items = settings.armature_source.action_items
             for i, action_item in enumerate(action_items):
-                name: str = action_item.action.name
-                looping: str = "1" if action_item.looping else "0"
-
-                animations_to_export += f"{name}::::{looping}"
+                animations_to_export += str(action_item)
                 if i < len(action_items) - 1:
                     animations_to_export += ", "
 
