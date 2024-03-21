@@ -4,12 +4,14 @@ from bpy.types import Armature, Collection, Operator, Panel, PropertyGroup, Scen
 from bpy.props import EnumProperty, PointerProperty, StringProperty
 from iqm_export import exportIQM
 
+
 def is_armature_in_collection(settings, armature):
     """Check if the armature data is associated with any object in the export_collection"""
     if not settings.export_collection:
         return False
 
     return any(object.data == armature for object in settings.export_collection.all_objects)
+
 
 def assign_armature_from_collection(settings, context):
     """Callback for when an Export Collection is chosen
@@ -39,8 +41,10 @@ def assign_armature_from_collection(settings, context):
         else:
             settings.armature_source = None
 
+
 class IQMExportPipeline_Export(Operator):
     """Run the exportIQM function with pre-defined pipeline options"""
+
     bl_idname = "export.iqm_pipeline"
     bl_label = "Export IQM via pipeline"
 
@@ -87,8 +91,10 @@ class IQMExportPipeline_Export(Operator):
 
         return {"FINISHED"}
 
+
 class IQMExportPipeline_Settings(PropertyGroup):
     """Properties to for exporting via the IQM Export Pipeline"""
+
     export_collection: PointerProperty(name="Export Collection", type=Collection, update=assign_armature_from_collection)
 
     export_directory: StringProperty(name="Output Path", subtype="DIR_PATH",  default="/tmp\\")
@@ -109,8 +115,10 @@ class IQMExportPipeline_Settings(PropertyGroup):
 
     armature_source: PointerProperty(name="Armature source", type=Armature, poll=is_armature_in_collection)
 
+
 class IQMExportPipeline_Panel(Panel):
     """Creates a panel in the Output section of the Properties Editor"""
+
     bl_label = "IQM Export Pipeline"
     bl_idname = "PROPERTIES_PT_iqm_export_pipeline"
     bl_space_type = "PROPERTIES"
@@ -164,6 +172,7 @@ class IQMExportPipeline_Panel(Panel):
 
 
 classes = [IQMExportPipeline_Export, IQMExportPipeline_Settings, IQMExportPipeline_Panel]
+
 
 def register():
     for class_to_register in classes:

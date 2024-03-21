@@ -4,14 +4,17 @@ import bpy
 from bpy.types import Action, Armature, Operator, PropertyGroup, UIList
 from bpy.props import BoolProperty, CollectionProperty, IntProperty, PointerProperty
 
+
 class ACTIONITEMS_ActionItem(PropertyGroup):
     """Group of properties representing an item in the list."""
 
     action: PointerProperty(name="action", type=Action)
     looping: BoolProperty(name="looping", default=False)
 
+
 class ACTIONITEMS_UL_ActionItemList(UIList):
     """UIList containing ActionItems"""
+
     bl_idname = "UI_UL_ActionItemList"
     layout_type = "DEFAULT"
 
@@ -26,8 +29,10 @@ class ACTIONITEMS_UL_ActionItemList(UIList):
             layout.alignment = "CENTER"
             layout.label(text="")
 
+
 class ACTIONITEMS_OT_List_Add(Operator):
     """Add an ActionItem to the ActionItemList"""
+
     bl_idname = "action_items.list_add"
     bl_label = "Add"
     bl_description = "Add an action to the list."
@@ -43,8 +48,10 @@ class ACTIONITEMS_OT_List_Add(Operator):
         armature.action_items.add()
         return {"FINISHED"}
 
+
 class ACTIONITEMS_OT_List_Remove(Operator):
     """Remove an ActionItem from the ActionItemList"""
+
     bl_idname = "action_items.list_remove"
     bl_label = "Remove"
     bl_description = "Remove an action from the list."
@@ -53,7 +60,7 @@ class ACTIONITEMS_OT_List_Remove(Operator):
     def poll(cls, context):
         settings = context.scene.iqm_export_pipeline_settings
         armature = settings.armature_source
-        return (armature.action_items and len(armature.action_items))
+        return armature.action_items and len(armature.action_items)
 
     def execute(self, context):
         settings = context.scene.iqm_export_pipeline_settings
@@ -63,7 +70,9 @@ class ACTIONITEMS_OT_List_Remove(Operator):
         armature.active_action_item_index = min(max(0, index - 1), len(armature.action_items) - 1)
         return {"FINISHED"}
 
+
 classes = [ACTIONITEMS_ActionItem, ACTIONITEMS_UL_ActionItemList, ACTIONITEMS_OT_List_Add, ACTIONITEMS_OT_List_Remove]
+
 
 def register():
     for class_to_register in classes:
@@ -71,6 +80,7 @@ def register():
 
     Armature.active_action_item_index = IntProperty(name="Index for action_items", default=0)
     Armature.action_items = CollectionProperty(type=ACTIONITEMS_ActionItem)
+
 
 def unregister():
     for class_to_unregister in classes:
