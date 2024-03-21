@@ -30,25 +30,30 @@ class IQMExportPipeline_Export(bpy.types.Operator):
 
         print(f"Actions to export: {animations_to_export}")
 
-        exportIQM(
-            context = bpy.context,
-            filename = os.path.join(file_directory, file_name + file_extention),
-            usemesh = True,
-            usemods = True,
-            useskel = True,
-            usebbox = True,
-            usecol = False,
-            scale = 1.0,
-            animspecs = animations_to_export,
-            matfun = (lambda prefix, image: prefix),
-            derigify = False,
-            boneorder = None
-            )
+        # Temporarily override the selected objects with the objects from the export_collection
+        with context.temp_override(selected_objects=settings.export_collection.all_objects):
+
+            exportIQM(
+                context = bpy.context,
+                filename = os.path.join(file_directory, file_name + file_extention),
+                usemesh = True,
+                usemods = True,
+                useskel = True,
+                usebbox = True,
+                usecol = False,
+                scale = 1.0,
+                animspecs = animations_to_export,
+                matfun = (lambda prefix, image: prefix),
+                derigify = False,
+                boneorder = None
+                )
 
         return {'FINISHED'}
 
 class IQMExportPipeline_Settings(bpy.types.PropertyGroup):
     """Properties to for exporting via the IQM Export Pipeline"""
+    export_collection: bpy.props.PointerProperty(name="Export Collection", type=bpy.types.Collection)
+
     export_directory: bpy.props.StringProperty(name="Output Path", subtype='DIR_PATH',  default="/tmp\\")
 
     file_name: bpy.props.StringProperty(name="File Name", subtype='FILE_NAME', default="ExampleFile")
@@ -79,6 +84,8 @@ class IQMExportPipeline_Panel(bpy.types.Panel):
         settings = context.scene.iqm_export_pipeline_settings
 
         layout = self.layout
+        row = layout.row()
+        row.prop(settings, "export_collection")
         row = layout.row()
         row.prop(settings, "export_directory")
         row = layout.row()
