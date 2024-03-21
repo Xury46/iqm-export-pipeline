@@ -5,10 +5,23 @@ from bpy.types import Action, Armature, Operator, PropertyGroup, UIList
 from bpy.props import BoolProperty, CollectionProperty, FloatProperty, IntProperty, PointerProperty
 
 
+def set_action_item_props(action_item, context):
+
+    if action_item.action:
+        action_item.frame_start = int(action_item.action.frame_range[0])
+        action_item.frame_end = int(action_item.action.frame_range[1])
+        action_item.fps = context.scene.render.fps
+    else:
+        action_item.frame_start = 0
+        action_item.frame_end = 0
+        action_item.fps = 0
+        action_item.looping = False
+
+
 class ACTIONITEMS_ActionItem(PropertyGroup):
     """Group of properties representing an item in the list."""
 
-    action: PointerProperty(name="action", type=Action)
+    action: PointerProperty(name="action", type=Action, update=set_action_item_props)
     frame_start: IntProperty(name="start frame")
     frame_end: IntProperty(name="end frame")
     fps: FloatProperty(name="frames per second")
