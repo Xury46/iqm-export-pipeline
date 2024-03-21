@@ -19,7 +19,7 @@ class IQMExportPipeline_Export(bpy.types.Operator):
             animations_to_export = settings.action_list_string
         elif settings.action_list_source == 'action_list':
 
-            action_items = context.active_object.data.action_items
+            action_items = settings.armature_source.action_items
             for i, action_item in enumerate(action_items):
                 name: str = action_item.action.name
                 looping: str = "1" if action_item.looping else "0"
@@ -65,6 +65,8 @@ class IQMExportPipeline_Settings(bpy.types.PropertyGroup):
 
     action_list_string: bpy.props.StringProperty(name="Animations",  default="idle::::1, walk::::1, run::::1")
 
+    armature_source: bpy.props.PointerProperty(name="Armature source", type=bpy.types.Armature)
+
 class IQMExportPipeline_Panel(bpy.types.Panel):
     """Creates a panel in the Output section of the Properties Editor"""
     bl_label = "IQM Export Pipeline"
@@ -90,17 +92,19 @@ class IQMExportPipeline_Panel(bpy.types.Panel):
             row.prop(settings, "action_list_string")
         elif settings.action_list_source == 'action_list':
             row = layout.row()
-            active_object = context.view_layer.objects.active
-            if active_object and active_object.type == 'ARMATURE':
+            row.prop(settings, "armature_source")
+
+            row = layout.row()
+            if settings.armature_source:
                 # The left column, containing the list.
                 col = row.column(align=True)
 
                 col.template_list(
                     listtype_name ="UI_UL_ActionItemList",
                     list_id = "DATA_UL_actions",
-                    dataptr = active_object.data,
+                    dataptr = settings.armature_source,
                     propname = "action_items",
-                    active_dataptr = active_object.data,
+                    active_dataptr = settings.armature_source,
                     active_propname = "active_action_item_index")
 
                 # The right column, containing the controls.
@@ -108,7 +112,7 @@ class IQMExportPipeline_Panel(bpy.types.Panel):
                 col.operator("action_items.list_add", text="", icon="ADD")
                 col.operator("action_items.list_remove", text="", icon="REMOVE")
             else:
-                row.label(text="Active object must be an Armature", icon="ERROR")
+                row.label(text="Choose an Armature to list its actions", icon="ERROR")
 
         row = layout.row()
         row.operator("export.iqm_pipeline", text="Export")

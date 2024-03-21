@@ -32,10 +32,12 @@ class ACTIONITEMS_OT_List_Add(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object.type == 'ARMATURE'
+        settings = context.scene.iqm_export_pipeline_settings
+        return settings.armature_source
 
     def execute(self, context):
-        armature = context.active_object.data
+        settings = context.scene.iqm_export_pipeline_settings
+        armature = settings.armature_source
         armature.action_items.add()
         return {'FINISHED'}
 
@@ -47,14 +49,13 @@ class ACTIONITEMS_OT_List_Remove(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        obj = context.active_object
-
-        return (obj.type == 'ARMATURE'
-                and obj.data.action_items
-                and len(obj.data.action_items))
+        settings = context.scene.iqm_export_pipeline_settings
+        armature = settings.armature_source
+        return (armature.action_items and len(armature.action_items))
 
     def execute(self, context):
-        armature = context.active_object.data
+        settings = context.scene.iqm_export_pipeline_settings
+        armature = settings.armature_source
         index = armature.active_action_item_index
         armature.action_items.remove(index)
         armature.active_action_item_index = min(max(0, index - 1), len(armature.action_items) - 1)
