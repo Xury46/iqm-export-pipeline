@@ -9,6 +9,34 @@ def is_armature_in_collection(settings, armature):
 
     return any(object.data == armature for object in settings.export_collection.all_objects)
 
+def assign_armature_from_collection(settings, context):
+    """Callback for when an Export Collection is chosen
+    Automatically assign the first available armature data in the collection to the Armature Source
+    """
+
+    # If there is no export_collection selected, clear the armature_source
+    if not settings.export_collection:
+        settings.armature_source = None
+        return
+
+    # If there are no objects in the selected export_collection, clear the armature_source
+    if not len(settings.export_collection.all_objects):
+        settings.armature_source = None
+        return
+
+    # If there is currently an armature_source, check if its object is associated with the selected export_collection
+    elif settings.armature_source:
+        if any(object.data == settings.armature_source for object in settings.export_collection.all_objects):
+            return
+
+    # Check if there is an object with armature data in the export_collection, if so, assign the first one found to the armature_source
+    for object in settings.export_collection.all_objects:
+        if object.type == 'ARMATURE':
+            settings.armature_source = object.data
+            return
+        else:
+            settings.armature_source = None
+
 class IQMExportPipeline_Export(bpy.types.Operator):
     """Run the exportIQM function with pre-defined pipeline options"""
     bl_idname = "export.iqm_pipeline"
@@ -59,7 +87,7 @@ class IQMExportPipeline_Export(bpy.types.Operator):
 
 class IQMExportPipeline_Settings(bpy.types.PropertyGroup):
     """Properties to for exporting via the IQM Export Pipeline"""
-    export_collection: bpy.props.PointerProperty(name="Export Collection", type=bpy.types.Collection)
+    export_collection: bpy.props.PointerProperty(name="Export Collection", type=bpy.types.Collection, update=assign_armature_from_collection)
 
     export_directory: bpy.props.StringProperty(name="Output Path", subtype='DIR_PATH',  default="/tmp\\")
 
