@@ -11,6 +11,22 @@ class ACTIONITEMS_ActionItem(PropertyGroup):
     action: PointerProperty(name="action", type=Action)
     looping: BoolProperty(name="looping", default=False)
 
+    def __str__(self) -> str:
+        """ The "Animations" field contains a comma (",") separated list of action names to export.
+        # The names can also have parameters of the form "name:X:Y:Z:L", where
+        # X is the start frame number,
+        # Y is the end frame number,
+        # Z is the frames per second (floating-point), and
+        # L is 0 or 1 to indicate looping.
+        # Earlier parameters can be left empty as in "idle::::1" to specify only a later parameter, and
+        # later parameters can be omitted if unnecessary as in "run:1:25".
+        """
+
+        name: str = self.action.name
+        looping: str = "1" if self.looping else "0"
+
+        return f"{name}::::{looping}"
+
 
 class ACTIONITEMS_UL_ActionItemList(UIList):
     """UIList containing ActionItems"""
