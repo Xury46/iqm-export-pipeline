@@ -2,6 +2,13 @@ import os
 import bpy
 from iqm_export import exportIQM
 
+def is_armature_in_collection(settings, armature):
+    """Check if the armature data is associated with any object in the export_collection"""
+    if not settings.export_collection:
+        return False
+
+    return any(object.data == armature for object in settings.export_collection.all_objects)
+
 class IQMExportPipeline_Export(bpy.types.Operator):
     """Run the exportIQM function with pre-defined pipeline options"""
     bl_idname = "export.iqm_pipeline"
@@ -70,7 +77,7 @@ class IQMExportPipeline_Settings(bpy.types.PropertyGroup):
 
     action_list_string: bpy.props.StringProperty(name="Animations",  default="idle::::1, walk::::1, run::::1")
 
-    armature_source: bpy.props.PointerProperty(name="Armature source", type=bpy.types.Armature)
+    armature_source: bpy.props.PointerProperty(name="Armature source", type=bpy.types.Armature, poll=is_armature_in_collection)
 
 class IQMExportPipeline_Panel(bpy.types.Panel):
     """Creates a panel in the Output section of the Properties Editor"""
