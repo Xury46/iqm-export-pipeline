@@ -33,7 +33,7 @@ def assign_armature_from_collection(settings, context):
 
     # Check if there is an object with armature data in the export_collection, if so, assign the first one found to the armature_source
     for object in settings.export_collection.all_objects:
-        if object.type == 'ARMATURE':
+        if object.type == "ARMATURE":
             settings.armature_source = object.data
             return
         else:
@@ -52,9 +52,9 @@ class IQMExportPipeline_Export(Operator):
         file_extention = ".iqm"
 
         animations_to_export = ""
-        if settings.action_list_source == 'string':
+        if settings.action_list_source == "string":
             animations_to_export = settings.action_list_string
-        elif settings.action_list_source == 'action_list':
+        elif settings.action_list_source == "action_list":
 
             action_items = settings.armature_source.action_items
             for i, action_item in enumerate(action_items):
@@ -85,23 +85,23 @@ class IQMExportPipeline_Export(Operator):
                 boneorder = None
                 )
 
-        return {'FINISHED'}
+        return {"FINISHED"}
 
 class IQMExportPipeline_Settings(PropertyGroup):
     """Properties to for exporting via the IQM Export Pipeline"""
     export_collection: PointerProperty(name="Export Collection", type=Collection, update=assign_armature_from_collection)
 
-    export_directory: StringProperty(name="Output Path", subtype='DIR_PATH',  default="/tmp\\")
+    export_directory: StringProperty(name="Output Path", subtype="DIR_PATH",  default="/tmp\\")
 
-    file_name: StringProperty(name="File Name", subtype='FILE_NAME', default="ExampleFile")
+    file_name: StringProperty(name="File Name", subtype="FILE_NAME", default="ExampleFile")
 
     action_list_source: EnumProperty(
         name="Action List Source",
         description="What source should provide the list of actions to export",
         items=[
-            ('none', 'None', "Don't export an action list", 0, 0),
-            ('string', 'String', "Use a string to manually type an action list", 0, 1),
-            ('action_list', 'Action List', "Use a UI list of actions to generate the action list", 0, 2)
+            ("none", "None", "Don't export an action list", 0, 0),
+            ("string", "String", "Use a string to manually type an action list", 0, 1),
+            ("action_list", "Action List", "Use a UI list of actions to generate the action list", 0, 2)
             ]
         )
 
@@ -113,9 +113,9 @@ class IQMExportPipeline_Panel(Panel):
     """Creates a panel in the Output section of the Properties Editor"""
     bl_label = "IQM Export Pipeline"
     bl_idname = "PROPERTIES_PT_iqm_export_pipeline"
-    bl_space_type = 'PROPERTIES'
-    bl_region_type = 'WINDOW'
-    bl_context = 'output'
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "output"
 
     def draw(self, context):
         settings = context.scene.iqm_export_pipeline_settings
@@ -131,10 +131,10 @@ class IQMExportPipeline_Panel(Panel):
         row.label(text="Action list source:")
         row.prop(settings, "action_list_source", text="Action list source", expand=True)
 
-        if settings.action_list_source == 'string':
+        if settings.action_list_source == "string":
             row = layout.row()
             row.prop(settings, "action_list_string")
-        elif settings.action_list_source == 'action_list':
+        elif settings.action_list_source == "action_list":
             row = layout.row()
             row.prop(settings, "armature_source")
 

@@ -16,14 +16,14 @@ class ACTIONITEMS_UL_ActionItemList(UIList):
     layout_type = "DEFAULT"
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index, flt_flag):
-        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+        if self.layout_type in {"DEFAULT", "COMPACT"}:
             row = layout.row()
             row.label(icon="ARMATURE_DATA")
             row.prop(data=item, property="looping", text="Looping")
             row.prop(data=item, property="action", text="")
 
-        elif self.layout_type in {'GRID'}:
-            layout.alignment = 'CENTER'
+        elif self.layout_type in {"GRID"}:
+            layout.alignment = "CENTER"
             layout.label(text="")
 
 class ACTIONITEMS_OT_List_Add(Operator):
@@ -41,7 +41,7 @@ class ACTIONITEMS_OT_List_Add(Operator):
         settings = context.scene.iqm_export_pipeline_settings
         armature = settings.armature_source
         armature.action_items.add()
-        return {'FINISHED'}
+        return {"FINISHED"}
 
 class ACTIONITEMS_OT_List_Remove(Operator):
     """Remove an ActionItem from the ActionItemList"""
@@ -61,7 +61,7 @@ class ACTIONITEMS_OT_List_Remove(Operator):
         index = armature.active_action_item_index
         armature.action_items.remove(index)
         armature.active_action_item_index = min(max(0, index - 1), len(armature.action_items) - 1)
-        return {'FINISHED'}
+        return {"FINISHED"}
 
 classes = [ACTIONITEMS_ActionItem, ACTIONITEMS_UL_ActionItemList, ACTIONITEMS_OT_List_Add, ACTIONITEMS_OT_List_Remove]
 
