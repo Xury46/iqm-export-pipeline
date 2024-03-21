@@ -6,6 +6,7 @@ class ACTIONITEMS_ActionItem(bpy.types.PropertyGroup):
     """Group of properties representing an item in the list."""
 
     action: bpy.props.PointerProperty(name="action", type=bpy.types.Action)
+    looping: bpy.props.BoolProperty(name="looping", default=False)
 
 class ACTIONITEMS_UL_ActionItemList(bpy.types.UIList):
     """UIList containing ActionItems"""
@@ -16,6 +17,7 @@ class ACTIONITEMS_UL_ActionItemList(bpy.types.UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             row = layout.row()
             row.label(icon="ARMATURE_DATA")
+            row.prop(data=item, property="looping", text="Looping")
             row.prop(data=item, property="action", text="")
 
         elif self.layout_type in {'GRID'}:

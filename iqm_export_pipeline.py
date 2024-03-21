@@ -14,19 +14,18 @@ class IQMExportPipeline_Export(bpy.types.Operator):
         file_name = settings.file_name
         file_extention = ".iqm"
 
-        if settings.action_list_source == 'none':
-            animations_to_export = ""
-        elif settings.action_list_source == 'string':
+        animations_to_export = ""
+        if settings.action_list_source == 'string':
             animations_to_export = settings.action_list_string
         elif settings.action_list_source == 'action_list':
-            action_names = []
-            for action_item in context.active_object.data.action_items:
-                action_names.append(action_item.action.name)
 
-            animations_to_export = ""
-            for i, action_name in enumerate(action_names):
-                animations_to_export += f"{action_name}::::1"
-                if i < len(action_names) - 1:
+            action_items = context.active_object.data.action_items
+            for i, action_item in enumerate(action_items):
+                name: str = action_item.action.name
+                looping: str = "1" if action_item.looping else "0"
+
+                animations_to_export += f"{name}::::{looping}"
+                if i < len(action_items) - 1:
                     animations_to_export += ", "
 
         print(f"Actions to export: {animations_to_export}")
@@ -92,7 +91,7 @@ class IQMExportPipeline_Panel(bpy.types.Panel):
         elif settings.action_list_source == 'action_list':
             row = layout.row()
             active_object = context.view_layer.objects.active
-            if active_object.type == 'ARMATURE':
+            if active_object and active_object.type == 'ARMATURE':
                 # The left column, containing the list.
                 col = row.column(align=True)
 
