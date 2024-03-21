@@ -1,5 +1,7 @@
 import os
 import bpy
+from bpy.types import Armature, Collection, Operator, Panel, PropertyGroup, Scene
+from bpy.props import EnumProperty, PointerProperty, StringProperty
 from iqm_export import exportIQM
 
 def is_armature_in_collection(settings, armature):
@@ -37,7 +39,7 @@ def assign_armature_from_collection(settings, context):
         else:
             settings.armature_source = None
 
-class IQMExportPipeline_Export(bpy.types.Operator):
+class IQMExportPipeline_Export(Operator):
     """Run the exportIQM function with pre-defined pipeline options"""
     bl_idname = "export.iqm_pipeline"
     bl_label = "Export IQM via pipeline"
@@ -85,15 +87,15 @@ class IQMExportPipeline_Export(bpy.types.Operator):
 
         return {'FINISHED'}
 
-class IQMExportPipeline_Settings(bpy.types.PropertyGroup):
+class IQMExportPipeline_Settings(PropertyGroup):
     """Properties to for exporting via the IQM Export Pipeline"""
-    export_collection: bpy.props.PointerProperty(name="Export Collection", type=bpy.types.Collection, update=assign_armature_from_collection)
+    export_collection: PointerProperty(name="Export Collection", type=Collection, update=assign_armature_from_collection)
 
-    export_directory: bpy.props.StringProperty(name="Output Path", subtype='DIR_PATH',  default="/tmp\\")
+    export_directory: StringProperty(name="Output Path", subtype='DIR_PATH',  default="/tmp\\")
 
-    file_name: bpy.props.StringProperty(name="File Name", subtype='FILE_NAME', default="ExampleFile")
+    file_name: StringProperty(name="File Name", subtype='FILE_NAME', default="ExampleFile")
 
-    action_list_source: bpy.props.EnumProperty(
+    action_list_source: EnumProperty(
         name="Action List Source",
         description="What source should provide the list of actions to export",
         items=[
@@ -103,11 +105,11 @@ class IQMExportPipeline_Settings(bpy.types.PropertyGroup):
             ]
         )
 
-    action_list_string: bpy.props.StringProperty(name="Animations",  default="idle::::1, walk::::1, run::::1")
+    action_list_string: StringProperty(name="Animations",  default="idle::::1, walk::::1, run::::1")
 
-    armature_source: bpy.props.PointerProperty(name="Armature source", type=bpy.types.Armature, poll=is_armature_in_collection)
+    armature_source: PointerProperty(name="Armature source", type=Armature, poll=is_armature_in_collection)
 
-class IQMExportPipeline_Panel(bpy.types.Panel):
+class IQMExportPipeline_Panel(Panel):
     """Creates a panel in the Output section of the Properties Editor"""
     bl_label = "IQM Export Pipeline"
     bl_idname = "PROPERTIES_PT_iqm_export_pipeline"
@@ -166,10 +168,10 @@ def register():
     for class_to_register in classes:
         bpy.utils.register_class(class_to_register)
 
-    bpy.types.Scene.iqm_export_pipeline_settings = bpy.props.PointerProperty(type = IQMExportPipeline_Settings)
+    Scene.iqm_export_pipeline_settings = PointerProperty(type = IQMExportPipeline_Settings)
 
 def unregister():
     for class_to_unregister in classes:
         bpy.utils.unregister_class(class_to_unregister)
 
-    del bpy.types.Scene.iqm_export_pipeline_settings
+    del Scene.iqm_export_pipeline_settings

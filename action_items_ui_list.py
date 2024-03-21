@@ -1,14 +1,16 @@
 # Custom UI List : https://blender.stackexchange.com/questions/248440/is-it-possible-to-use-custom-class-for-uilist
 
 import bpy
+from bpy.types import Action, Armature, Operator, PropertyGroup, UIList
+from bpy.props import BoolProperty, CollectionProperty, IntProperty, PointerProperty
 
-class ACTIONITEMS_ActionItem(bpy.types.PropertyGroup):
+class ACTIONITEMS_ActionItem(PropertyGroup):
     """Group of properties representing an item in the list."""
 
-    action: bpy.props.PointerProperty(name="action", type=bpy.types.Action)
-    looping: bpy.props.BoolProperty(name="looping", default=False)
+    action: PointerProperty(name="action", type=Action)
+    looping: BoolProperty(name="looping", default=False)
 
-class ACTIONITEMS_UL_ActionItemList(bpy.types.UIList):
+class ACTIONITEMS_UL_ActionItemList(UIList):
     """UIList containing ActionItems"""
     bl_idname = "UI_UL_ActionItemList"
     layout_type = "DEFAULT"
@@ -24,7 +26,7 @@ class ACTIONITEMS_UL_ActionItemList(bpy.types.UIList):
             layout.alignment = 'CENTER'
             layout.label(text="")
 
-class ACTIONITEMS_OT_List_Add(bpy.types.Operator):
+class ACTIONITEMS_OT_List_Add(Operator):
     """Add an ActionItem to the ActionItemList"""
     bl_idname = "action_items.list_add"
     bl_label = "Add"
@@ -41,7 +43,7 @@ class ACTIONITEMS_OT_List_Add(bpy.types.Operator):
         armature.action_items.add()
         return {'FINISHED'}
 
-class ACTIONITEMS_OT_List_Remove(bpy.types.Operator):
+class ACTIONITEMS_OT_List_Remove(Operator):
     """Remove an ActionItem from the ActionItemList"""
     bl_idname = "action_items.list_remove"
     bl_label = "Remove"
@@ -67,12 +69,12 @@ def register():
     for class_to_register in classes:
         bpy.utils.register_class(class_to_register)
 
-    bpy.types.Armature.active_action_item_index = bpy.props.IntProperty(name="Index for action_items", default=0)
-    bpy.types.Armature.action_items = bpy.props.CollectionProperty(type=ACTIONITEMS_ActionItem)
+    Armature.active_action_item_index = IntProperty(name="Index for action_items", default=0)
+    Armature.action_items = CollectionProperty(type=ACTIONITEMS_ActionItem)
 
 def unregister():
     for class_to_unregister in classes:
         bpy.utils.unregister_class(class_to_unregister)
 
-    del bpy.types.Armature.active_action_item_index
-    del bpy.types.Armature.action_items
+    del Armature.active_action_item_index
+    del Armature.action_items
