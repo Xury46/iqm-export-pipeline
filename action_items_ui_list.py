@@ -12,7 +12,7 @@ class ACTIONITEMS_ActionItem(PropertyGroup):
     looping: BoolProperty(name="looping", default=False)
 
     def __str__(self) -> str:
-        """ The "Animations" field contains a comma (",") separated list of action names to export.
+        """The "Animations" field contains a comma (",") separated list of action names to export.
         # The names can also have parameters of the form "name:X:Y:Z:L", where
         # X is the start frame number,
         # Y is the end frame number,
