@@ -83,7 +83,7 @@ class IQMExportPipeline_Export(Operator):
                 animspecs=animations_to_export,
                 matfun=(lambda prefix, image: prefix),
                 derigify=False,
-                boneorder=None
+                boneorder=None,
             )
 
         return {"FINISHED"}
@@ -94,7 +94,7 @@ class IQMExportPipeline_Settings(PropertyGroup):
 
     export_collection: PointerProperty(name="Export Collection", type=Collection, update=assign_armature_from_collection)
 
-    export_directory: StringProperty(name="Output Path", subtype="DIR_PATH",  default="/tmp\\")
+    export_directory: StringProperty(name="Output Path", subtype="DIR_PATH", default="/tmp\\")
 
     file_name: StringProperty(name="File Name", subtype="FILE_NAME", default="ExampleFile")
 
@@ -104,11 +104,11 @@ class IQMExportPipeline_Settings(PropertyGroup):
         items=[
             ("none", "None", "Don't export an action list", 0, 0),
             ("string", "String", "Use a string to manually type an action list", 0, 1),
-            ("action_list", "Action List", "Use a UI list of actions to generate the action list", 0, 2)
-            ]
-        )
+            ("action_list", "Action List", "Use a UI list of actions to generate the action list", 0, 2),
+        ],
+    )
 
-    action_list_string: StringProperty(name="Animations",  default="idle::::1, walk::::1, run::::1")
+    action_list_string: StringProperty(name="Animations", default="idle::::1, walk::::1, run::::1")
 
     armature_source: PointerProperty(name="Armature source", type=Armature, poll=is_armature_in_collection)
 
@@ -154,7 +154,7 @@ class IQMExportPipeline_Panel(Panel):
                     dataptr=settings.armature_source,
                     propname="action_items",
                     active_dataptr=settings.armature_source,
-                    active_propname="active_action_item_index"
+                    active_propname="active_action_item_index",
                 )
 
                 # The right column, containing the controls.
@@ -176,6 +176,7 @@ def register():
         bpy.utils.register_class(class_to_register)
 
     Scene.iqm_export_pipeline_settings = PointerProperty(type=IQMExportPipeline_Settings)
+
 
 def unregister():
     for class_to_unregister in classes:
