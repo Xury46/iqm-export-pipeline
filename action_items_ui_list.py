@@ -44,8 +44,11 @@ class ACTIONITEMS_UL_ActionItemList(UIList):
         if self.layout_type in {"DEFAULT", "COMPACT"}:
             row = layout.row()
             row.label(icon="ARMATURE_DATA")
-            row.prop(data=item, property="looping", text="Looping")
             row.prop(data=item, property="action", text="")
+            row.prop(data=item, property="frame_start", text="Start")
+            row.prop(data=item, property="frame_end", text="End")
+            row.prop(data=item, property="fps", text="FPS")
+            row.prop(data=item, property="looping", text="Looping")
 
         elif self.layout_type in {"GRID"}:
             layout.alignment = "CENTER"
