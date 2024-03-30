@@ -140,10 +140,11 @@ class IQMExportPipeline_Panel(Panel):
             row = layout.row()
             row.prop(settings, "action_list_string")
         elif settings.action_list_source == "action_list":
-            row = layout.row()
+            action_items_box = layout.box()
+            row = action_items_box.row()
             row.prop(settings, "armature_source")
 
-            row = layout.row()
+            row = action_items_box.row()
             if settings.armature_source:
                 # The left column, containing the list.
                 col = row.column(align=True)
@@ -162,6 +163,7 @@ class IQMExportPipeline_Panel(Panel):
                 col.operator("action_items.list_add", text="", icon="ADD")
                 col.operator("action_items.list_remove", text="", icon="REMOVE")
             else:
+                row = action_items_box.row()
                 row.label(text="Choose an Armature to list its actions", icon="ERROR")
 
         row = layout.row()
