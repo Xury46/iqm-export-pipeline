@@ -4,6 +4,8 @@ import bpy
 from bpy.types import Action, Armature, Operator, PropertyGroup, UIList
 from bpy.props import BoolProperty, CollectionProperty, FloatProperty, IntProperty, PointerProperty
 
+SPLIT_FACTOR: float = 0.4
+
 
 def set_action_item_props(action_item, context):
 
@@ -56,12 +58,17 @@ class ACTIONITEMS_UL_ActionItemList(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index, flt_flag):
         if self.layout_type in {"DEFAULT", "COMPACT"}:
             row = layout.row()
-            row.label(icon="ARMATURE_DATA")
-            row.prop(data=item, property="action", text="")
-            row.prop(data=item, property="frame_start", text="Start")
-            row.prop(data=item, property="frame_end", text="End")
-            row.prop(data=item, property="fps", text="FPS")
-            row.prop(data=item, property="looping", text="Looping")
+            action_prop_split = row.split(factor=SPLIT_FACTOR)
+
+            action_side = action_prop_split.row()
+            action_side.label(icon="ARMATURE_DATA")
+            action_side.prop(data=item, property="action", text="")
+
+            property_side = action_prop_split.grid_flow(row_major=False, columns=4, even_columns=True)
+            property_side.prop(data=item, property="frame_start", text="Start")
+            property_side.prop(data=item, property="frame_end", text="End")
+            property_side.prop(data=item, property="fps", text="FPS")
+            property_side.prop(data=item, property="looping", text="Looping")
 
         elif self.layout_type in {"GRID"}:
             layout.alignment = "CENTER"
