@@ -65,10 +65,10 @@ class ACTIONITEMS_UL_ActionItemList(UIList):
             action_side.prop(data=item, property="action", text="")
 
             property_side = action_prop_split.grid_flow(row_major=False, columns=4, even_columns=True)
-            property_side.prop(data=item, property="frame_start", text="Start")
-            property_side.prop(data=item, property="frame_end", text="End")
-            property_side.prop(data=item, property="fps", text="FPS")
-            property_side.prop(data=item, property="looping", text="Looping")
+            property_side.prop(data=item, property="frame_start", text="")
+            property_side.prop(data=item, property="frame_end", text="")
+            property_side.prop(data=item, property="fps", text="")
+            property_side.prop(data=item, property="looping", text="")
 
         elif self.layout_type in {"GRID"}:
             layout.alignment = "CENTER"
