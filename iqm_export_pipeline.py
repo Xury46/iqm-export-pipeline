@@ -142,7 +142,7 @@ class IQMExportPipeline_Panel(Panel):
         elif settings.action_list_source == "action_list":
             action_items_box = layout.box()
             row = action_items_box.row()
-            row.prop(settings, "armature_source")
+            row.prop(settings, "armature_source", text="Armature")
 
             row = action_items_box.row()
             if settings.armature_source:
