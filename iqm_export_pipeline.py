@@ -1,5 +1,7 @@
 import os
+from dataclasses import dataclass
 import bpy
+from mathutils import Euler, Vector
 from bpy.types import Armature, Collection, Operator, Panel, PropertyGroup, Scene
 from bpy.props import EnumProperty, FloatProperty, FloatVectorProperty, PointerProperty, StringProperty
 from iqm_export import exportIQM
@@ -48,6 +50,17 @@ class IQMExportPipeline_Export(Operator):
 
     bl_idname = "export.iqm_pipeline"
     bl_label = "Export IQM via pipeline"
+
+    @dataclass
+    class DecomposedTransforms:
+        """Cache location, rotation, and scale values before using them to compose a matrix.
+        Particularly useful for storing and recalling rotation_euler angles since Euler values
+        outside a -180 to 180 degree range aren't preserved through matrix composition/decomposition.
+        """
+
+        location: Vector
+        rotation_euler: Euler
+        scale: Vector
 
     def execute(self, context):
         settings = context.scene.iqm_export_pipeline_settings
