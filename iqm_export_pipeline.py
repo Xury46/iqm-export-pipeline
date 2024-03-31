@@ -219,6 +219,21 @@ class IQM_EXPORT_PIPELINE_PT_Panel(Panel):
         row = layout.row()
         row.prop(settings, "export_collection")
 
+
+class IQM_EXPORT_PIPELINE_PT_AnimationsSubpanel(Panel):
+    """Creates a subpanel in the IQM Export Pipeline for storing animation properties."""
+
+    bl_label = "Animations"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "output"
+    bl_parent_id = "PROPERTIES_PT_iqm_export_pipeline"
+
+    def draw(self, context):
+        settings = context.scene.iqm_export_pipeline_settings
+
+        layout = self.layout
+
         row = layout.row(align=True)
         row.label(text="Action list source:")
         row.prop(settings, "action_list_source", text="Action list source", expand=True)
@@ -331,6 +346,7 @@ classes = [
     IQM_EXPORT_PIPELINE_OT_Export,
     IQM_EXPORT_PIPELINE_SettingsProp,
     IQM_EXPORT_PIPELINE_PT_Panel,
+    IQM_EXPORT_PIPELINE_PT_AnimationsSubpanel,
     IQM_EXPORT_PIPELINE_PT_TransformOffsetSubpanel,
     IQM_EXPORT_PIPELINE_PT_OutputSubpanel,
 ]
