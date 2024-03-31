@@ -242,14 +242,13 @@ class IQM_EXPORT_PIPELINE_PT_AnimationsSubpanel(Panel):
             row = layout.row()
             row.prop(settings, "action_list_string")
         elif settings.action_list_source == "action_list":
-            action_items_box = layout.box()
-            row = action_items_box.row()
+            row = layout.row()
             row.prop(settings, "armature_source", text="Armature")
 
             if settings.armature_source:
                 # Make a row to draw the header.
                 # Property text labels go in left column, a spacer goes in the right column.
-                action_items_header_row = action_items_box.row()
+                action_items_header_row = layout.row()
 
                 # The left column, containing the header labels.
                 col = action_items_header_row.column(align=True)
@@ -272,7 +271,7 @@ class IQM_EXPORT_PIPELINE_PT_AnimationsSubpanel(Panel):
 
                 # Make a row to draw the Action Items.
                 # The ActionItemList goes in the left column, the UIList operator buttons go in the right column.
-                action_items_ui_list_row = action_items_box.row()
+                action_items_ui_list_row = layout.row()
 
                 # The left column, containing the ActionItemList.
                 col = action_items_ui_list_row.column(align=True)
@@ -292,7 +291,7 @@ class IQM_EXPORT_PIPELINE_PT_AnimationsSubpanel(Panel):
                 col.operator("action_items.list_add", text="", icon="ADD")
                 col.operator("action_items.list_remove", text="", icon="REMOVE")
             else:
-                row = action_items_box.row()
+                row = layout.row()
                 row.label(text="Choose an Armature to list its actions", icon="ERROR")
 
 
