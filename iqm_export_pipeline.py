@@ -3,6 +3,7 @@ import bpy
 from bpy.types import Armature, Collection, Operator, Panel, PropertyGroup, Scene
 from bpy.props import EnumProperty, PointerProperty, StringProperty
 from iqm_export import exportIQM
+from .action_items_ui_list import SPLIT_FACTOR
 
 
 def is_armature_in_collection(settings, armature):
@@ -140,14 +141,42 @@ class IQMExportPipeline_Panel(Panel):
             row = layout.row()
             row.prop(settings, "action_list_string")
         elif settings.action_list_source == "action_list":
-            row = layout.row()
-            row.prop(settings, "armature_source")
+            action_items_box = layout.box()
+            row = action_items_box.row()
+            row.prop(settings, "armature_source", text="Armature")
 
-            row = layout.row()
             if settings.armature_source:
-                # The left column, containing the list.
-                col = row.column(align=True)
+                # Make a row to draw the header.
+                # Property text labels go in left column, a spacer goes in the right column.
+                action_items_header_row = action_items_box.row()
 
+                # The left column, containing the header labels.
+                col = action_items_header_row.column(align=True)
+
+                # Make a row to put the Action label in.
+                action_prop_split = col.split(factor=SPLIT_FACTOR)
+                action_side = action_prop_split.row(align=True)
+                action_side.label(text="Action:")
+
+                # Make a row to evenly space the properties in.
+                property_side = action_prop_split.grid_flow(row_major=False, columns=4, even_columns=True)
+                property_side.label(text="Start:")
+                property_side.label(text="End:")
+                property_side.label(text="FPS:")
+                property_side.label(text="Loop:")
+
+                # The right column, containing a spacer.
+                col = action_items_header_row.column(align=True)
+                col.separator(factor=3.35)  # Add a spacer that matches the width of the - and + icon buttons.
+
+                # Make a row to draw the Action Items.
+                # The ActionItemList goes in the left column, the UIList operator buttons go in the right column.
+                action_items_ui_list_row = action_items_box.row()
+
+                # The left column, containing the ActionItemList.
+                col = action_items_ui_list_row.column(align=True)
+
+                # Draw the ActionItemList.
                 col.template_list(
                     listtype_name="UI_UL_ActionItemList",
                     list_id="DATA_UL_actions",
@@ -158,10 +187,11 @@ class IQMExportPipeline_Panel(Panel):
                 )
 
                 # The right column, containing the controls.
-                col = row.column(align=True)
+                col = action_items_ui_list_row.column(align=True)
                 col.operator("action_items.list_add", text="", icon="ADD")
                 col.operator("action_items.list_remove", text="", icon="REMOVE")
             else:
+                row = action_items_box.row()
                 row.label(text="Choose an Armature to list its actions", icon="ERROR")
 
         row = layout.row()

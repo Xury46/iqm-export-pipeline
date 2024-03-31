@@ -2,13 +2,31 @@
 
 import bpy
 from bpy.types import Action, Armature, Operator, PropertyGroup, UIList
-from bpy.props import BoolProperty, CollectionProperty, IntProperty, PointerProperty
+from bpy.props import BoolProperty, CollectionProperty, FloatProperty, IntProperty, PointerProperty
+
+SPLIT_FACTOR: float = 0.4
+
+
+def set_action_item_props(action_item, context):
+
+    if action_item.action:
+        action_item.frame_start = int(action_item.action.frame_range[0])
+        action_item.frame_end = int(action_item.action.frame_range[1])
+        action_item.fps = context.scene.render.fps
+    else:
+        action_item.frame_start = 0
+        action_item.frame_end = 0
+        action_item.fps = 0
+        action_item.looping = False
 
 
 class ACTIONITEMS_ActionItem(PropertyGroup):
     """Group of properties representing an item in the list."""
 
-    action: PointerProperty(name="action", type=Action)
+    action: PointerProperty(name="action", type=Action, update=set_action_item_props)
+    frame_start: IntProperty(name="start frame")
+    frame_end: IntProperty(name="end frame")
+    fps: FloatProperty(name="frames per second")
     looping: BoolProperty(name="looping", default=False)
 
     def __str__(self) -> str:
@@ -23,9 +41,12 @@ class ACTIONITEMS_ActionItem(PropertyGroup):
         """
 
         name: str = self.action.name
+        start: int = self.frame_start
+        end: int = self.frame_end
+        fps: float = self.fps
         looping: str = "1" if self.looping else "0"
 
-        return f"{name}::::{looping}"
+        return f"{name}:{start}:{end}:{fps}:{looping}"
 
 
 class ACTIONITEMS_UL_ActionItemList(UIList):
@@ -37,9 +58,17 @@ class ACTIONITEMS_UL_ActionItemList(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index, flt_flag):
         if self.layout_type in {"DEFAULT", "COMPACT"}:
             row = layout.row()
-            row.label(icon="ARMATURE_DATA")
-            row.prop(data=item, property="looping", text="Looping")
-            row.prop(data=item, property="action", text="")
+            action_prop_split = row.split(factor=SPLIT_FACTOR)
+
+            action_side = action_prop_split.row()
+            action_side.label(icon="ARMATURE_DATA")
+            action_side.prop(data=item, property="action", text="")
+
+            property_side = action_prop_split.grid_flow(row_major=False, columns=4, even_columns=True)
+            property_side.prop(data=item, property="frame_start", text="")
+            property_side.prop(data=item, property="frame_end", text="")
+            property_side.prop(data=item, property="fps", text="")
+            property_side.prop(data=item, property="looping", text="")
 
         elif self.layout_type in {"GRID"}:
             layout.alignment = "CENTER"
