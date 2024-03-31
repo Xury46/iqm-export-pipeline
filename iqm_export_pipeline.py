@@ -1,7 +1,10 @@
 import os
+from dataclasses import dataclass
 import bpy
+from math import radians
+from mathutils import Euler, Matrix, Vector
 from bpy.types import Armature, Collection, Operator, Panel, PropertyGroup, Scene
-from bpy.props import EnumProperty, PointerProperty, StringProperty
+from bpy.props import EnumProperty, FloatProperty, FloatVectorProperty, PointerProperty, StringProperty
 from iqm_export import exportIQM
 from .action_items_ui_list import SPLIT_FACTOR
 
@@ -49,6 +52,17 @@ class IQMExportPipeline_Export(Operator):
     bl_idname = "export.iqm_pipeline"
     bl_label = "Export IQM via pipeline"
 
+    @dataclass
+    class DecomposedTransforms:
+        """Cache location, rotation, and scale values before using them to compose a matrix.
+        Particularly useful for storing and recalling rotation_euler angles since Euler values
+        outside a -180 to 180 degree range aren't preserved through matrix composition/decomposition.
+        """
+
+        location: Vector
+        rotation_euler: Euler
+        scale: Vector
+
     def execute(self, context):
         settings = context.scene.iqm_export_pipeline_settings
 
@@ -69,9 +83,40 @@ class IQMExportPipeline_Export(Operator):
 
         print(f"Actions to export: {animations_to_export}")
 
+        # Build the offset matrix.
+        offset_matrix = Matrix.LocRotScale(
+            settings.offset_location,
+            Euler(settings.offset_rotation, "XYZ"),
+            Vector.Fill(3, settings.offset_scale),
+        )
+
         # Temporarily override the selected objects with the objects from the export_collection
         with context.temp_override(selected_objects=settings.export_collection.all_objects):
 
+            # Cache the original transforms, then offset them.
+            original_transforms: dict[self.DecomposedTransforms] = {}
+            for obj in context.selected_objects:
+                # Don't offset objects that are children of other objects (avoids double-transformations).
+                if obj.parent:
+                    continue
+
+                original_transforms[obj.name] = self.DecomposedTransforms(
+                    obj.location.copy(),
+                    obj.rotation_euler.copy(),
+                    obj.scale.copy(),
+                )
+
+                new_transform = offset_matrix @ obj.matrix_local
+                new_location, new_rotation, new_scale = new_transform.decompose()
+
+                obj.location = new_location
+                obj.rotation_euler = new_rotation.to_euler("XYZ")
+                obj.scale = new_scale
+
+            # Force an update so that the transforms are correctly offset in time for export.
+            context.view_layer.update()
+
+            # Export
             exportIQM(
                 context=bpy.context,
                 filename=os.path.join(file_directory, file_name + file_extention),
@@ -86,6 +131,14 @@ class IQMExportPipeline_Export(Operator):
                 derigify=False,
                 boneorder=None,
             )
+
+            # Reset the transforms
+            for obj_name, original in original_transforms.items():
+                obj = bpy.data.objects[obj_name]
+
+                obj.location = original.location
+                obj.rotation_euler = original.rotation_euler
+                obj.scale = original.scale
 
         return {"FINISHED"}
 
@@ -113,6 +166,12 @@ class IQMExportPipeline_Settings(PropertyGroup):
 
     armature_source: PointerProperty(name="Armature source", type=Armature, poll=is_armature_in_collection)
 
+    offset_location: FloatVectorProperty(name="Location offset", default=(0, 0, -24), subtype="TRANSLATION")
+
+    offset_rotation: FloatVectorProperty(name="Rotation offset", default=(0, 0, radians(90)), subtype="EULER")
+
+    offset_scale: FloatProperty(name="Scale offset", default=32)
+
 
 class IQMExportPipeline_Panel(Panel):
     """Creates a panel in the Output section of the Properties Editor"""
@@ -133,6 +192,17 @@ class IQMExportPipeline_Panel(Panel):
         row.prop(settings, "export_directory")
         row = layout.row()
         row.prop(settings, "file_name")
+
+        offset_box = layout.box()
+        offset_box.use_property_split = True
+        offset_box.use_property_decorate = False
+        row = offset_box.row()
+        row.prop(settings, "offset_location", expand=True)
+        row = offset_box.row()
+        row.prop(settings, "offset_rotation", expand=True)
+        row = offset_box.row()
+        row.prop(settings, "offset_scale", expand=True)
+
         row = layout.row(align=True)
         row.label(text="Action list source:")
         row.prop(settings, "action_list_source", text="Action list source", expand=True)
