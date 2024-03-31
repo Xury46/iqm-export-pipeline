@@ -219,16 +219,6 @@ class IQM_EXPORT_PIPELINE_PT_Panel(Panel):
         row = layout.row()
         row.prop(settings, "export_collection")
 
-        offset_box = layout.box()
-        offset_box.use_property_split = True
-        offset_box.use_property_decorate = False
-        row = offset_box.row()
-        row.prop(settings, "offset_location", expand=True)
-        row = offset_box.row()
-        row.prop(settings, "offset_rotation", expand=True)
-        row = offset_box.row()
-        row.prop(settings, "offset_scale", expand=True)
-
         row = layout.row(align=True)
         row.label(text="Action list source:")
         row.prop(settings, "action_list_source", text="Action list source", expand=True)
@@ -313,10 +303,35 @@ class IQM_EXPORT_PIPELINE_PT_OutputSubpanel(Panel):
         row.operator("export.iqm_pipeline", text="Export")
 
 
+class IQM_EXPORT_PIPELINE_PT_TransformOffsetSubpanel(Panel):
+    """Creates a subpanel in the IQM Export Pipeline for storing transform offset properties."""
+
+    bl_label = "Transform Offset"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "output"
+    bl_parent_id = "PROPERTIES_PT_iqm_export_pipeline"
+
+    def draw(self, context):
+        settings = context.scene.iqm_export_pipeline_settings
+
+        layout = self.layout
+        offset_box = layout.box()
+        offset_box.use_property_split = True
+        offset_box.use_property_decorate = False
+        row = offset_box.row()
+        row.prop(settings, "offset_location", expand=True)
+        row = offset_box.row()
+        row.prop(settings, "offset_rotation", expand=True)
+        row = offset_box.row()
+        row.prop(settings, "offset_scale", expand=True)
+
+
 classes = [
     IQM_EXPORT_PIPELINE_OT_Export,
     IQM_EXPORT_PIPELINE_SettingsProp,
     IQM_EXPORT_PIPELINE_PT_Panel,
+    IQM_EXPORT_PIPELINE_PT_TransformOffsetSubpanel,
     IQM_EXPORT_PIPELINE_PT_OutputSubpanel,
 ]
 
