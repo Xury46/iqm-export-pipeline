@@ -192,6 +192,15 @@ class IQMExportPipeline_Panel(Panel):
         row.prop(settings, "export_directory")
         row = layout.row()
         row.prop(settings, "file_name")
+
+        offset_box = layout.box()
+        row = offset_box.row(align=True)
+        row.prop(settings, "offset_location")
+        row = offset_box.row(align=True)
+        row.prop(settings, "offset_rotation")
+        row = offset_box.row(align=True)
+        row.prop(settings, "offset_scale")
+
         row = layout.row(align=True)
         row.label(text="Action list source:")
         row.prop(settings, "action_list_source", text="Action list source", expand=True)
