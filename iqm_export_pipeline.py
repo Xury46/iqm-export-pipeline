@@ -1,7 +1,7 @@
 import os
 import bpy
 from bpy.types import Armature, Collection, Operator, Panel, PropertyGroup, Scene
-from bpy.props import EnumProperty, PointerProperty, StringProperty
+from bpy.props import EnumProperty, FloatProperty, FloatVectorProperty, PointerProperty, StringProperty
 from iqm_export import exportIQM
 from .action_items_ui_list import SPLIT_FACTOR
 
@@ -112,6 +112,12 @@ class IQMExportPipeline_Settings(PropertyGroup):
     action_list_string: StringProperty(name="Animations", default="idle::::1, walk::::1, run::::1")
 
     armature_source: PointerProperty(name="Armature source", type=Armature, poll=is_armature_in_collection)
+
+    offset_location: FloatVectorProperty(name="Location offset", default=(0, 0, -24), subtype="TRANSLATION")
+
+    offset_rotation: FloatVectorProperty(name="Rotation offset", default=(0, 0, radians(90)), subtype="EULER")
+
+    offset_scale: FloatProperty(name="Scale offset", default=32)
 
 
 class IQMExportPipeline_Panel(Panel):
