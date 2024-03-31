@@ -338,14 +338,13 @@ class IQM_EXPORT_PIPELINE_PT_TransformOffsetSubpanel(Panel):
         settings = context.scene.iqm_export_pipeline_settings
 
         layout = self.layout
-        offset_box = layout.box()
-        offset_box.use_property_split = True
-        offset_box.use_property_decorate = False
-        row = offset_box.row()
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+        row = layout.row()
         row.prop(settings, "offset_location", expand=True)
-        row = offset_box.row()
+        row = layout.row()
         row.prop(settings, "offset_rotation", expand=True)
-        row = offset_box.row()
+        row = layout.row()
         row.prop(settings, "offset_scale", expand=True)
 
 
