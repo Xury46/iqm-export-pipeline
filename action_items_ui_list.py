@@ -20,7 +20,7 @@ def set_action_item_props(action_item, context):
         action_item.looping = False
 
 
-class ACTIONITEMS_ActionItem(PropertyGroup):
+class ACTIONITEMS_ActionItemProp(PropertyGroup):
     """Group of properties representing an item in the list."""
 
     action: PointerProperty(name="action", type=Action, update=set_action_item_props)
@@ -117,7 +117,7 @@ class ACTIONITEMS_OT_List_Remove(Operator):
 
 
 classes = [
-    ACTIONITEMS_ActionItem,
+    ACTIONITEMS_ActionItemProp,
     ACTIONITEMS_UL_ActionItemList,
     ACTIONITEMS_OT_List_Add,
     ACTIONITEMS_OT_List_Remove,
@@ -129,7 +129,7 @@ def register():
         bpy.utils.register_class(class_to_register)
 
     Armature.active_action_item_index = IntProperty(name="Index for action_items", default=0)
-    Armature.action_items = CollectionProperty(type=ACTIONITEMS_ActionItem)
+    Armature.action_items = CollectionProperty(type=ACTIONITEMS_ActionItemProp)
 
 
 def unregister():

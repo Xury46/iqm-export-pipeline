@@ -46,7 +46,7 @@ def assign_armature_from_collection(settings, context):
             settings.armature_source = None
 
 
-class IQMExportPipeline_Export(Operator):
+class IQM_EXPORT_PIPELINE_OT_Export(Operator):
     """Run the exportIQM function with pre-defined pipeline options"""
 
     bl_idname = "export.iqm_pipeline"
@@ -143,7 +143,7 @@ class IQMExportPipeline_Export(Operator):
         return {"FINISHED"}
 
 
-class IQMExportPipeline_Settings(PropertyGroup):
+class IQM_EXPORT_PIPELINE_SettingsProp(PropertyGroup):
     """Properties to for exporting via the IQM Export Pipeline"""
 
     export_collection: PointerProperty(name="Export Collection", type=Collection, update=assign_armature_from_collection)
@@ -173,7 +173,7 @@ class IQMExportPipeline_Settings(PropertyGroup):
     offset_scale: FloatProperty(name="Scale offset", default=32)
 
 
-class IQMExportPipeline_Panel(Panel):
+class IQM_EXPORT_PIPELINE_PT_Panel(Panel):
     """Creates a panel in the Output section of the Properties Editor"""
 
     bl_label = "IQM Export Pipeline"
@@ -269,9 +269,9 @@ class IQMExportPipeline_Panel(Panel):
 
 
 classes = [
-    IQMExportPipeline_Export,
-    IQMExportPipeline_Settings,
-    IQMExportPipeline_Panel,
+    IQM_EXPORT_PIPELINE_OT_Export,
+    IQM_EXPORT_PIPELINE_SettingsProp,
+    IQM_EXPORT_PIPELINE_PT_Panel,
 ]
 
 
@@ -279,7 +279,7 @@ def register():
     for class_to_register in classes:
         bpy.utils.register_class(class_to_register)
 
-    Scene.iqm_export_pipeline_settings = PointerProperty(type=IQMExportPipeline_Settings)
+    Scene.iqm_export_pipeline_settings = PointerProperty(type=IQM_EXPORT_PIPELINE_SettingsProp)
 
 
 def unregister():
