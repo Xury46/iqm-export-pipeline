@@ -218,10 +218,6 @@ class IQM_EXPORT_PIPELINE_PT_Panel(Panel):
         layout = self.layout
         row = layout.row()
         row.prop(settings, "export_collection")
-        row = layout.row()
-        row.prop(settings, "export_directory")
-        row = layout.row()
-        row.prop(settings, "file_name")
 
         offset_box = layout.box()
         offset_box.use_property_split = True
@@ -294,6 +290,25 @@ class IQM_EXPORT_PIPELINE_PT_Panel(Panel):
                 row = action_items_box.row()
                 row.label(text="Choose an Armature to list its actions", icon="ERROR")
 
+
+class IQM_EXPORT_PIPELINE_PT_OutputSubpanel(Panel):
+    """Creates a subpanel in the IQM Export Pipeline for storing output properties."""
+
+    bl_label = "Output"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "output"
+    bl_parent_id = "PROPERTIES_PT_iqm_export_pipeline"
+
+    def draw(self, context):
+        settings = context.scene.iqm_export_pipeline_settings
+
+        layout = self.layout
+        row = layout.row()
+        row.prop(settings, "export_directory")
+        row = layout.row()
+        row.prop(settings, "file_name")
+
         row = layout.row()
         row.operator("export.iqm_pipeline", text="Export")
 
@@ -302,6 +317,7 @@ classes = [
     IQM_EXPORT_PIPELINE_OT_Export,
     IQM_EXPORT_PIPELINE_SettingsProp,
     IQM_EXPORT_PIPELINE_PT_Panel,
+    IQM_EXPORT_PIPELINE_PT_OutputSubpanel,
 ]
 
 
