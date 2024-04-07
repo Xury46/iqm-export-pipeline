@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+import traceback
 import bpy
 from math import radians
 from mathutils import Euler, Matrix, Vector
@@ -117,52 +118,57 @@ class IQM_EXPORT_PIPELINE_OT_Export(Operator):
         # Temporarily override the selected objects with the objects from the export_collection
         with context.temp_override(selected_objects=settings.export_collection.all_objects):
 
-            # Cache the original transforms, then offset them.
-            original_transforms: dict[self.DecomposedTransforms] = {}
-            for obj in context.selected_objects:
-                # Don't offset objects that are children of other objects (avoids double-transformations).
-                if obj.parent:
-                    continue
+            try:
+                # Cache the original transforms, then offset them.
+                original_transforms: dict[self.DecomposedTransforms] = {}
+                for obj in context.selected_objects:
+                    # Don't offset objects that are children of other objects (avoids double-transformations).
+                    if obj.parent:
+                        continue
 
-                original_transforms[obj.name] = self.DecomposedTransforms(
-                    obj.location.copy(),
-                    obj.rotation_euler.copy(),
-                    obj.scale.copy(),
+                    original_transforms[obj.name] = self.DecomposedTransforms(
+                        obj.location.copy(),
+                        obj.rotation_euler.copy(),
+                        obj.scale.copy(),
+                    )
+
+                    new_transform = offset_matrix @ obj.matrix_local
+                    new_location, new_rotation, new_scale = new_transform.decompose()
+
+                    obj.location = new_location
+                    obj.rotation_euler = new_rotation.to_euler("XYZ")
+                    obj.scale = new_scale
+
+                # Force an update so that the transforms are correctly offset in time for export.
+                context.view_layer.update()
+
+                # Export
+                exportIQM(
+                    context=bpy.context,
+                    filename=os.path.join(file_directory, file_name + file_extention),
+                    usemesh=True,
+                    usemods=True,
+                    useskel=True,
+                    usebbox=True,
+                    usecol=False,
+                    scale=1.0,
+                    animspecs=animations_to_export,
+                    matfun=(lambda prefix, image: prefix),
+                    derigify=False,
+                    boneorder=None,
                 )
 
-                new_transform = offset_matrix @ obj.matrix_local
-                new_location, new_rotation, new_scale = new_transform.decompose()
+            except Exception:
+                print(traceback.format_exc())
 
-                obj.location = new_location
-                obj.rotation_euler = new_rotation.to_euler("XYZ")
-                obj.scale = new_scale
+            finally:
+                # Reset the transforms
+                for obj_name, original in original_transforms.items():
+                    obj = bpy.data.objects[obj_name]
 
-            # Force an update so that the transforms are correctly offset in time for export.
-            context.view_layer.update()
-
-            # Export
-            exportIQM(
-                context=bpy.context,
-                filename=os.path.join(file_directory, file_name + file_extention),
-                usemesh=True,
-                usemods=True,
-                useskel=True,
-                usebbox=True,
-                usecol=False,
-                scale=1.0,
-                animspecs=animations_to_export,
-                matfun=(lambda prefix, image: prefix),
-                derigify=False,
-                boneorder=None,
-            )
-
-            # Reset the transforms
-            for obj_name, original in original_transforms.items():
-                obj = bpy.data.objects[obj_name]
-
-                obj.location = original.location
-                obj.rotation_euler = original.rotation_euler
-                obj.scale = original.scale
+                    obj.location = original.location
+                    obj.rotation_euler = original.rotation_euler
+                    obj.scale = original.scale
 
         return {"FINISHED"}
 
