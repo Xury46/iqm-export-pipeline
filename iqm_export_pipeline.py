@@ -268,7 +268,11 @@ class IQMExportPipeline_Panel(Panel):
         row.operator("export.iqm_pipeline", text="Export")
 
 
-classes = [IQMExportPipeline_Export, IQMExportPipeline_Settings, IQMExportPipeline_Panel]
+classes = [
+    IQMExportPipeline_Export,
+    IQMExportPipeline_Settings,
+    IQMExportPipeline_Panel,
+]
 
 
 def register():

@@ -116,7 +116,12 @@ class ACTIONITEMS_OT_List_Remove(Operator):
         return {"FINISHED"}
 
 
-classes = [ACTIONITEMS_ActionItem, ACTIONITEMS_UL_ActionItemList, ACTIONITEMS_OT_List_Add, ACTIONITEMS_OT_List_Remove]
+classes = [
+    ACTIONITEMS_ActionItem,
+    ACTIONITEMS_UL_ActionItemList,
+    ACTIONITEMS_OT_List_Add,
+    ACTIONITEMS_OT_List_Remove,
+]
 
 
 def register():
