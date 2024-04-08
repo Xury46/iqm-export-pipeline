@@ -5,7 +5,7 @@ import bpy
 from math import radians
 from mathutils import Euler, Matrix, Vector
 from bpy.types import Armature, Collection, Operator, Panel, PropertyGroup, Scene
-from bpy.props import EnumProperty, FloatProperty, FloatVectorProperty, PointerProperty, StringProperty
+from bpy.props import EnumProperty, FloatVectorProperty, PointerProperty, StringProperty
 from iqm_export import exportIQM
 from .action_items_ui_list import SPLIT_FACTOR
 from .pipeline_presets import IQM_EXPORT_PIPELINE_PT_TransformOffsetPresets
@@ -120,7 +120,7 @@ class IQM_EXPORT_PIPELINE_OT_Export(Operator):
         offset_matrix = Matrix.LocRotScale(
             settings.offset_location,
             Euler(settings.offset_rotation, "XYZ"),
-            Vector.Fill(3, settings.offset_scale),
+            settings.offset_scale,
         )
 
         # Temporarily override the selected objects with the objects from the export_collection
@@ -208,7 +208,7 @@ class IQM_EXPORT_PIPELINE_SettingsProp(PropertyGroup):
 
     offset_rotation: FloatVectorProperty(name="Rotation offset", default=(0, 0, radians(90)), subtype="EULER")
 
-    offset_scale: FloatProperty(name="Scale offset", default=32)
+    offset_scale: FloatVectorProperty(name="Scale offset", default=(32, 32, 32), subtype="XYZ")
 
 
 class IQM_EXPORT_PIPELINE_PT_Panel(Panel):
