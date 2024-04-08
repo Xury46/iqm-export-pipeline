@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+import traceback
 import bpy
 from math import radians
 from mathutils import Euler, Matrix, Vector
@@ -46,7 +47,7 @@ def assign_armature_from_collection(settings, context):
             settings.armature_source = None
 
 
-class IQMExportPipeline_Export(Operator):
+class IQM_EXPORT_PIPELINE_OT_Export(Operator):
     """Run the exportIQM function with pre-defined pipeline options"""
 
     bl_idname = "export.iqm_pipeline"
@@ -62,6 +63,37 @@ class IQMExportPipeline_Export(Operator):
         location: Vector
         rotation_euler: Euler
         scale: Vector
+
+    @classmethod
+    def poll(cls, context):
+        # Ensure the scene contains an instance of the iqm_export_pipeline_settings PropertyGroup.
+        if not hasattr(context.scene, "iqm_export_pipeline_settings"):
+            return False
+
+        settings = context.scene.iqm_export_pipeline_settings
+
+        # Check if an export collection has been selected, and if it has objects in it.
+        export_collection = settings.export_collection
+        if not export_collection or not export_collection.all_objects:
+            return False
+
+        # Validate the action_list_source
+        if settings.action_list_source == "string":
+            # Make sure the action_list_string isn't blank
+            if not settings.action_list_string:
+                return False
+
+        elif settings.action_list_source == "action_list":
+            # Check if an armature source has been selected, and if it has at least one action_item in the action_items list.
+            armature = settings.armature_source
+            if not armature or not hasattr(armature, "action_items") or not armature.action_items:
+                return False
+
+            # Make sure that all action_items have been assigned an action.
+            if any(action_item.action is None for action_item in armature.action_items):
+                return False
+
+        return True
 
     def execute(self, context):
         settings = context.scene.iqm_export_pipeline_settings
@@ -93,57 +125,62 @@ class IQMExportPipeline_Export(Operator):
         # Temporarily override the selected objects with the objects from the export_collection
         with context.temp_override(selected_objects=settings.export_collection.all_objects):
 
-            # Cache the original transforms, then offset them.
-            original_transforms: dict[self.DecomposedTransforms] = {}
-            for obj in context.selected_objects:
-                # Don't offset objects that are children of other objects (avoids double-transformations).
-                if obj.parent:
-                    continue
+            try:
+                # Cache the original transforms, then offset them.
+                original_transforms: dict[self.DecomposedTransforms] = {}
+                for obj in context.selected_objects:
+                    # Don't offset objects that are children of other objects (avoids double-transformations).
+                    if obj.parent:
+                        continue
 
-                original_transforms[obj.name] = self.DecomposedTransforms(
-                    obj.location.copy(),
-                    obj.rotation_euler.copy(),
-                    obj.scale.copy(),
+                    original_transforms[obj.name] = self.DecomposedTransforms(
+                        obj.location.copy(),
+                        obj.rotation_euler.copy(),
+                        obj.scale.copy(),
+                    )
+
+                    new_transform = offset_matrix @ obj.matrix_local
+                    new_location, new_rotation, new_scale = new_transform.decompose()
+
+                    obj.location = new_location
+                    obj.rotation_euler = new_rotation.to_euler("XYZ")
+                    obj.scale = new_scale
+
+                # Force an update so that the transforms are correctly offset in time for export.
+                context.view_layer.update()
+
+                # Export
+                exportIQM(
+                    context=bpy.context,
+                    filename=os.path.join(file_directory, file_name + file_extention),
+                    usemesh=True,
+                    usemods=True,
+                    useskel=True,
+                    usebbox=True,
+                    usecol=False,
+                    scale=1.0,
+                    animspecs=animations_to_export,
+                    matfun=(lambda prefix, image: prefix),
+                    derigify=False,
+                    boneorder=None,
                 )
 
-                new_transform = offset_matrix @ obj.matrix_local
-                new_location, new_rotation, new_scale = new_transform.decompose()
+            except Exception:
+                print(traceback.format_exc())
 
-                obj.location = new_location
-                obj.rotation_euler = new_rotation.to_euler("XYZ")
-                obj.scale = new_scale
+            finally:
+                # Reset the transforms
+                for obj_name, original in original_transforms.items():
+                    obj = bpy.data.objects[obj_name]
 
-            # Force an update so that the transforms are correctly offset in time for export.
-            context.view_layer.update()
-
-            # Export
-            exportIQM(
-                context=bpy.context,
-                filename=os.path.join(file_directory, file_name + file_extention),
-                usemesh=True,
-                usemods=True,
-                useskel=True,
-                usebbox=True,
-                usecol=False,
-                scale=1.0,
-                animspecs=animations_to_export,
-                matfun=(lambda prefix, image: prefix),
-                derigify=False,
-                boneorder=None,
-            )
-
-            # Reset the transforms
-            for obj_name, original in original_transforms.items():
-                obj = bpy.data.objects[obj_name]
-
-                obj.location = original.location
-                obj.rotation_euler = original.rotation_euler
-                obj.scale = original.scale
+                    obj.location = original.location
+                    obj.rotation_euler = original.rotation_euler
+                    obj.scale = original.scale
 
         return {"FINISHED"}
 
 
-class IQMExportPipeline_Settings(PropertyGroup):
+class IQM_EXPORT_PIPELINE_SettingsProp(PropertyGroup):
     """Properties to for exporting via the IQM Export Pipeline"""
 
     export_collection: PointerProperty(name="Export Collection", type=Collection, update=assign_armature_from_collection)
@@ -173,7 +210,7 @@ class IQMExportPipeline_Settings(PropertyGroup):
     offset_scale: FloatProperty(name="Scale offset", default=32)
 
 
-class IQMExportPipeline_Panel(Panel):
+class IQM_EXPORT_PIPELINE_PT_Panel(Panel):
     """Creates a panel in the Output section of the Properties Editor"""
 
     bl_label = "IQM Export Pipeline"
@@ -188,20 +225,21 @@ class IQMExportPipeline_Panel(Panel):
         layout = self.layout
         row = layout.row()
         row.prop(settings, "export_collection")
-        row = layout.row()
-        row.prop(settings, "export_directory")
-        row = layout.row()
-        row.prop(settings, "file_name")
 
-        offset_box = layout.box()
-        offset_box.use_property_split = True
-        offset_box.use_property_decorate = False
-        row = offset_box.row()
-        row.prop(settings, "offset_location", expand=True)
-        row = offset_box.row()
-        row.prop(settings, "offset_rotation", expand=True)
-        row = offset_box.row()
-        row.prop(settings, "offset_scale", expand=True)
+
+class IQM_EXPORT_PIPELINE_PT_AnimationsSubpanel(Panel):
+    """Creates a subpanel in the IQM Export Pipeline for storing animation properties."""
+
+    bl_label = "Animations"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "output"
+    bl_parent_id = "PROPERTIES_PT_iqm_export_pipeline"
+
+    def draw(self, context):
+        settings = context.scene.iqm_export_pipeline_settings
+
+        layout = self.layout
 
         row = layout.row(align=True)
         row.label(text="Action list source:")
@@ -211,14 +249,13 @@ class IQMExportPipeline_Panel(Panel):
             row = layout.row()
             row.prop(settings, "action_list_string")
         elif settings.action_list_source == "action_list":
-            action_items_box = layout.box()
-            row = action_items_box.row()
+            row = layout.row()
             row.prop(settings, "armature_source", text="Armature")
 
             if settings.armature_source:
                 # Make a row to draw the header.
                 # Property text labels go in left column, a spacer goes in the right column.
-                action_items_header_row = action_items_box.row()
+                action_items_header_row = layout.row()
 
                 # The left column, containing the header labels.
                 col = action_items_header_row.column(align=True)
@@ -241,7 +278,7 @@ class IQMExportPipeline_Panel(Panel):
 
                 # Make a row to draw the Action Items.
                 # The ActionItemList goes in the left column, the UIList operator buttons go in the right column.
-                action_items_ui_list_row = action_items_box.row()
+                action_items_ui_list_row = layout.row()
 
                 # The left column, containing the ActionItemList.
                 col = action_items_ui_list_row.column(align=True)
@@ -261,21 +298,70 @@ class IQMExportPipeline_Panel(Panel):
                 col.operator("action_items.list_add", text="", icon="ADD")
                 col.operator("action_items.list_remove", text="", icon="REMOVE")
             else:
-                row = action_items_box.row()
+                row = layout.row()
                 row.label(text="Choose an Armature to list its actions", icon="ERROR")
+
+
+class IQM_EXPORT_PIPELINE_PT_OutputSubpanel(Panel):
+    """Creates a subpanel in the IQM Export Pipeline for storing output properties."""
+
+    bl_label = "Output"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "output"
+    bl_parent_id = "PROPERTIES_PT_iqm_export_pipeline"
+
+    def draw(self, context):
+        settings = context.scene.iqm_export_pipeline_settings
+
+        layout = self.layout
+        row = layout.row()
+        row.prop(settings, "export_directory")
+        row = layout.row()
+        row.prop(settings, "file_name")
 
         row = layout.row()
         row.operator("export.iqm_pipeline", text="Export")
 
 
-classes = [IQMExportPipeline_Export, IQMExportPipeline_Settings, IQMExportPipeline_Panel]
+class IQM_EXPORT_PIPELINE_PT_TransformOffsetSubpanel(Panel):
+    """Creates a subpanel in the IQM Export Pipeline for storing transform offset properties."""
+
+    bl_label = "Transform Offset"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "output"
+    bl_parent_id = "PROPERTIES_PT_iqm_export_pipeline"
+
+    def draw(self, context):
+        settings = context.scene.iqm_export_pipeline_settings
+
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+        row = layout.row()
+        row.prop(settings, "offset_location", expand=True)
+        row = layout.row()
+        row.prop(settings, "offset_rotation", expand=True)
+        row = layout.row()
+        row.prop(settings, "offset_scale", expand=True)
+
+
+classes = [
+    IQM_EXPORT_PIPELINE_OT_Export,
+    IQM_EXPORT_PIPELINE_SettingsProp,
+    IQM_EXPORT_PIPELINE_PT_Panel,
+    IQM_EXPORT_PIPELINE_PT_AnimationsSubpanel,
+    IQM_EXPORT_PIPELINE_PT_TransformOffsetSubpanel,
+    IQM_EXPORT_PIPELINE_PT_OutputSubpanel,
+]
 
 
 def register():
     for class_to_register in classes:
         bpy.utils.register_class(class_to_register)
 
-    Scene.iqm_export_pipeline_settings = PointerProperty(type=IQMExportPipeline_Settings)
+    Scene.iqm_export_pipeline_settings = PointerProperty(type=IQM_EXPORT_PIPELINE_SettingsProp)
 
 
 def unregister():

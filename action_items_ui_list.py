@@ -20,7 +20,7 @@ def set_action_item_props(action_item, context):
         action_item.looping = False
 
 
-class ACTIONITEMS_ActionItem(PropertyGroup):
+class ACTIONITEMS_ActionItemProp(PropertyGroup):
     """Group of properties representing an item in the list."""
 
     action: PointerProperty(name="action", type=Action, update=set_action_item_props)
@@ -105,7 +105,8 @@ class ACTIONITEMS_OT_List_Remove(Operator):
     def poll(cls, context):
         settings = context.scene.iqm_export_pipeline_settings
         armature = settings.armature_source
-        return armature.action_items and len(armature.action_items)
+        # Check if an armature source has been selected, and if it has at least one action_item in the action_items list.
+        return armature and hasattr(armature, "action_items") and armature.action_items
 
     def execute(self, context):
         settings = context.scene.iqm_export_pipeline_settings
@@ -116,7 +117,12 @@ class ACTIONITEMS_OT_List_Remove(Operator):
         return {"FINISHED"}
 
 
-classes = [ACTIONITEMS_ActionItem, ACTIONITEMS_UL_ActionItemList, ACTIONITEMS_OT_List_Add, ACTIONITEMS_OT_List_Remove]
+classes = [
+    ACTIONITEMS_ActionItemProp,
+    ACTIONITEMS_UL_ActionItemList,
+    ACTIONITEMS_OT_List_Add,
+    ACTIONITEMS_OT_List_Remove,
+]
 
 
 def register():
@@ -124,7 +130,7 @@ def register():
         bpy.utils.register_class(class_to_register)
 
     Armature.active_action_item_index = IntProperty(name="Index for action_items", default=0)
-    Armature.action_items = CollectionProperty(type=ACTIONITEMS_ActionItem)
+    Armature.action_items = CollectionProperty(type=ACTIONITEMS_ActionItemProp)
 
 
 def unregister():
