@@ -8,6 +8,7 @@ from bpy.types import Armature, Collection, Operator, Panel, PropertyGroup, Scen
 from bpy.props import EnumProperty, FloatProperty, FloatVectorProperty, PointerProperty, StringProperty
 from iqm_export import exportIQM
 from .action_items_ui_list import SPLIT_FACTOR
+from .pipeline_presets import IQM_EXPORT_PIPELINE_PT_TransformOffsetPresets
 
 
 def is_armature_in_collection(settings, armature):
@@ -332,6 +333,9 @@ class IQM_EXPORT_PIPELINE_PT_TransformOffsetSubpanel(Panel):
     bl_region_type = "WINDOW"
     bl_context = "output"
     bl_parent_id = "PROPERTIES_PT_iqm_export_pipeline"
+
+    def draw_header_preset(self, context):
+        IQM_EXPORT_PIPELINE_PT_TransformOffsetPresets.draw_panel_header(self.layout)
 
     def draw(self, context):
         settings = context.scene.iqm_export_pipeline_settings
