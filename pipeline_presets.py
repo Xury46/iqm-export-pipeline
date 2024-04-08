@@ -4,7 +4,7 @@ import filecmp
 import bpy
 from bpy.types import Menu, Operator, Panel
 from bl_ui.utils import PresetPanel
-from bl_operators.presets import AddPresetBase
+from bl_operators.presets import AddPresetBase, ExecutePreset
 
 
 def install_presets():
@@ -35,8 +35,28 @@ def install_presets():
 class IQM_EXPORT_PIPELINE_MT_TransformOffsetPresets(Menu):
     bl_label = "Transform Offset Presets"
     preset_subdir = "iqm_export_pipeline"
-    preset_operator = "script.execute_preset"
+    preset_operator = "script.execute_preset_tag_redraw"
     draw = Menu.draw_preset
+
+
+class SCRIPT_OT_execute_preset_tag_redraw(ExecutePreset):
+    """A wrapper operator to force a UI update after setting the preset values."""
+
+    bl_idname = "script.execute_preset_tag_redraw"
+    bl_label = "Execute a Python Preset and force a UI update"
+
+    def execute(self, context):
+        # The default script.execute_preset takes arguments for file_path and menu_idname
+        # self.file_path is passed in when the preset menu calls this function
+        # TODO figure out how self.menu_idname is normally passed in and get the value that way instead of hard-coding it here.
+        self.menu_idname = "IQM_EXPORT_PIPELINE_PT_TransformOffsetPresets"
+
+        super().execute(context)  # Execute the preset via the default behavior in bpy.ops.script.execute_preset()
+
+        # Force a UI update after applying the preset
+        context.region.tag_redraw()
+
+        return {"FINISHED"}
 
 
 class IQM_EXPORT_PIPELINE_OT_AddTransformOffsetPreset(AddPresetBase, Operator):
@@ -63,7 +83,7 @@ class IQM_EXPORT_PIPELINE_OT_AddTransformOffsetPreset(AddPresetBase, Operator):
 class IQM_EXPORT_PIPELINE_PT_TransformOffsetPresets(PresetPanel, Panel):
     bl_label = "Transform Offset Presets"
     preset_subdir = "iqm_export_pipeline"
-    preset_operator = "script.execute_preset"
+    preset_operator = "script.execute_preset_tag_redraw"
     preset_add_operator = "iqm_preset.add_transform_offset_preset"
 
 
@@ -71,6 +91,7 @@ classes = [
     IQM_EXPORT_PIPELINE_MT_TransformOffsetPresets,
     IQM_EXPORT_PIPELINE_OT_AddTransformOffsetPreset,
     IQM_EXPORT_PIPELINE_PT_TransformOffsetPresets,
+    SCRIPT_OT_execute_preset_tag_redraw,
 ]
 
 
