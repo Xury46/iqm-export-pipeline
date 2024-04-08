@@ -14,9 +14,11 @@ if "bpy" in locals():
 
     importlib.reload(iqm_export_pipeline)
     importlib.reload(action_items_ui_list)
+    importlib.reload(pipeline_presets)
 else:
     from . import iqm_export_pipeline
     from . import action_items_ui_list
+    from . import pipeline_presets
 
 import bpy
 
@@ -24,11 +26,13 @@ import bpy
 def register():
     iqm_export_pipeline.register()
     action_items_ui_list.register()
+    pipeline_presets.register()
 
 
 def unregister():
     iqm_export_pipeline.unregister()
     action_items_ui_list.unregister()
+    pipeline_presets.unregister()
 
 
 if __name__ == "__main__":
