@@ -63,6 +63,37 @@ class IQM_EXPORT_PIPELINE_OT_Export(Operator):
         rotation_euler: Euler
         scale: Vector
 
+    @classmethod
+    def poll(cls, context):
+        # Ensure the scene contains an instance of the iqm_export_pipeline_settings PropertyGroup.
+        if not hasattr(context.scene, "iqm_export_pipeline_settings"):
+            return False
+
+        settings = context.scene.iqm_export_pipeline_settings
+
+        # Check if an export collection has been selected, and if it has objects in it.
+        export_collection = settings.export_collection
+        if not export_collection or not export_collection.all_objects:
+            return False
+
+        # Validate the action_list_source
+        if settings.action_list_source == "string":
+            # Make sure the action_list_string isn't blank
+            if not settings.action_list_string:
+                return False
+
+        elif settings.action_list_source == "action_list":
+            # Check if an armature source has been selected, and if it has at least one action_item in the action_items list.
+            armature = settings.armature_source
+            if not armature or not hasattr(armature, "action_items") or not armature.action_items:
+                return False
+
+            # Make sure that all action_items have been assigned an action.
+            if any(action_item.action is None for action_item in armature.action_items):
+                return False
+
+        return True
+
     def execute(self, context):
         settings = context.scene.iqm_export_pipeline_settings
 
