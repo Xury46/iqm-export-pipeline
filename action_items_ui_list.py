@@ -105,7 +105,8 @@ class ACTIONITEMS_OT_List_Remove(Operator):
     def poll(cls, context):
         settings = context.scene.iqm_export_pipeline_settings
         armature = settings.armature_source
-        return armature.action_items and len(armature.action_items)
+        # Check if an armature source has been selected, and if it has at least one action_item in the action_items list.
+        return armature and hasattr(armature, "action_items") and armature.action_items
 
     def execute(self, context):
         settings = context.scene.iqm_export_pipeline_settings
