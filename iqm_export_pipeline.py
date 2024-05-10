@@ -184,6 +184,8 @@ class IQM_EXPORT_PIPELINE_PT_Panel(Panel):
         layout = self.layout
         row = layout.row()
         row.prop(settings, "export_collection")
+        row = layout.row()
+        row.prop(settings.export_collection, "iqm_export_pipeline_file_name")
 
 
 class IQM_EXPORT_PIPELINE_PT_AnimationsSubpanel(Panel):
@@ -269,8 +271,6 @@ class IQM_EXPORT_PIPELINE_PT_OutputSubpanel(Panel):
         layout = self.layout
         row = layout.row()
         row.prop(settings, "export_directory")
-        row = layout.row()
-        row.prop(settings.export_collection, "iqm_export_pipeline_file_name")
 
         row = layout.row()
         row.operator("export.iqm_pipeline", text="Export")
