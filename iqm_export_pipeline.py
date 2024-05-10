@@ -62,7 +62,7 @@ class IQM_EXPORT_PIPELINE_OT_Export(Operator):
         settings = context.scene.iqm_export_pipeline_settings
 
         file_directory = os.path.abspath(settings.export_directory)
-        file_name = settings.file_name
+        file_name = settings.export_collection.iqm_export_pipeline_file_name
         file_extention = ".iqm"
 
         animations_to_export = ""
@@ -149,8 +149,6 @@ class IQM_EXPORT_PIPELINE_SettingsProp(PropertyGroup):
     export_collection: PointerProperty(name="Export Collection", type=Collection)
 
     export_directory: StringProperty(name="Output Path", subtype="DIR_PATH", default="/tmp\\")
-
-    file_name: StringProperty(name="File Name", subtype="FILE_NAME", default="ExampleFile")
 
     action_list_source: EnumProperty(
         name="Action List Source",
@@ -272,7 +270,7 @@ class IQM_EXPORT_PIPELINE_PT_OutputSubpanel(Panel):
         row = layout.row()
         row.prop(settings, "export_directory")
         row = layout.row()
-        row.prop(settings, "file_name")
+        row.prop(settings.export_collection, "iqm_export_pipeline_file_name")
 
         row = layout.row()
         row.operator("export.iqm_pipeline", text="Export")
@@ -319,6 +317,7 @@ def register():
         bpy.utils.register_class(class_to_register)
 
     Scene.iqm_export_pipeline_settings = PointerProperty(type=IQM_EXPORT_PIPELINE_SettingsProp)
+    Collection.iqm_export_pipeline_file_name = StringProperty(name="File Name", subtype="FILE_NAME", default="ExampleFile")
 
 
 def unregister():
@@ -326,3 +325,4 @@ def unregister():
         bpy.utils.unregister_class(class_to_unregister)
 
     del Scene.iqm_export_pipeline_settings
+    del Collection.iqm_export_pipeline_file_name
