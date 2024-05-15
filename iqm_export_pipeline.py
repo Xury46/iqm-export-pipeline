@@ -148,7 +148,7 @@ class IQM_EXPORT_PIPELINE_SettingsProp(PropertyGroup):
 
     export_collection: PointerProperty(name="Export Collection", type=Collection)
 
-    export_directory: StringProperty(name="Output Path", subtype="DIR_PATH", default="/tmp\\")
+    export_directory: StringProperty(name="Output Directory", subtype="DIR_PATH", default="/tmp\\")
 
     action_list_source: EnumProperty(
         name="Action List Source",
