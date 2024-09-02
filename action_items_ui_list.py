@@ -1,7 +1,7 @@
 # Custom UI List : https://blender.stackexchange.com/questions/248440/is-it-possible-to-use-custom-class-for-uilist
 
 import bpy
-from bpy.types import Action, Armature, Operator, PropertyGroup, UIList
+from bpy.types import Action, Collection, Operator, PropertyGroup, UIList
 from bpy.props import BoolProperty, CollectionProperty, FloatProperty, IntProperty, PointerProperty
 
 SPLIT_FACTOR: float = 0.4
@@ -85,12 +85,12 @@ class ACTIONITEMS_OT_List_Add(Operator):
     @classmethod
     def poll(cls, context):
         settings = context.scene.iqm_export_pipeline_settings
-        return settings.armature_source
+        return settings.export_collection
 
     def execute(self, context):
         settings = context.scene.iqm_export_pipeline_settings
-        armature = settings.armature_source
-        armature.action_items.add()
+        export_collection = settings.export_collection
+        export_collection.action_items.add()
         return {"FINISHED"}
 
 
@@ -104,16 +104,16 @@ class ACTIONITEMS_OT_List_Remove(Operator):
     @classmethod
     def poll(cls, context):
         settings = context.scene.iqm_export_pipeline_settings
-        armature = settings.armature_source
+        export_collection = settings.export_collection
         # Check if an armature source has been selected, and if it has at least one action_item in the action_items list.
-        return armature and hasattr(armature, "action_items") and armature.action_items
+        return export_collection and hasattr(export_collection, "action_items") and export_collection.action_items
 
     def execute(self, context):
         settings = context.scene.iqm_export_pipeline_settings
-        armature = settings.armature_source
-        index = armature.active_action_item_index
-        armature.action_items.remove(index)
-        armature.active_action_item_index = min(max(0, index - 1), len(armature.action_items) - 1)
+        export_collection = settings.export_collection
+        index = export_collection.active_action_item_index
+        export_collection.action_items.remove(index)
+        export_collection.active_action_item_index = min(max(0, index - 1), len(export_collection.action_items) - 1)
         return {"FINISHED"}
 
 
@@ -129,13 +129,13 @@ def register():
     for class_to_register in classes:
         bpy.utils.register_class(class_to_register)
 
-    Armature.active_action_item_index = IntProperty(name="Index for action_items", default=0)
-    Armature.action_items = CollectionProperty(type=ACTIONITEMS_ActionItemProp)
+    Collection.active_action_item_index = IntProperty(name="Index for action_items", default=0)
+    Collection.action_items = CollectionProperty(type=ACTIONITEMS_ActionItemProp)
 
 
 def unregister():
     for class_to_unregister in classes:
         bpy.utils.unregister_class(class_to_unregister)
 
-    del Armature.active_action_item_index
-    del Armature.action_items
+    del Collection.active_action_item_index
+    del Collection.action_items
