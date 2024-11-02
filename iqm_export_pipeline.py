@@ -11,6 +11,32 @@ from .action_items_ui_list import SPLIT_FACTOR
 from .pipeline_presets import IQM_EXPORT_PIPELINE_PT_TransformOffsetPresets
 
 
+def evaluate_collection(collection: Collection) -> None:
+    """Check the objects in the collection for issues.
+    Check if objects in the collection reference armatures that are not present in the collection.
+
+    :param Collection collection: The collection to evaluate
+    :raises InvalidCollectionError: When the collection is invalid
+    """
+
+    for object in collection.all_objects:
+        for modifier in object.modifiers:
+            if modifier.type == "ARMATURE":
+                referenced_armature = modifier.object
+                if not referenced_armature:
+                    continue
+                if collection not in referenced_armature.users_collection:
+                    raise InvalidCollectionError(
+                        # Message about the invalid armature
+                        f'The object "{object.name}", references an armature "{referenced_armature.name}"'
+                        f' that is not present in the export collection "{collection.name}".'
+                    )
+
+
+class InvalidCollectionError(Exception):
+    pass
+
+
 class IQM_EXPORT_PIPELINE_OT_Export(Operator):
     """Run the exportIQM function with pre-defined pipeline options"""
 
@@ -60,6 +86,12 @@ class IQM_EXPORT_PIPELINE_OT_Export(Operator):
 
     def execute(self, context):
         settings = context.scene.iqm_export_pipeline_settings
+
+        try:
+            evaluate_collection(settings.export_collection)
+        except InvalidCollectionError as e:
+            self.report({"ERROR_INVALID_INPUT"}, repr(e))
+            return {"CANCELLED"}
 
         file_directory = os.path.abspath(settings.export_directory)
         file_name = settings.export_collection.iqm_export_pipeline_file_name
