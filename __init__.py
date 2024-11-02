@@ -1,7 +1,7 @@
 bl_info = {
     "name": "IQM Export Pipeline",
     "author": "Xury Greer",
-    "version": (1, 0),
+    "version": (1, 1),
     "blender": (3, 6, 0),
     "location": "Armature > Data > IQM",
     "description": "A pipeline that offers quality-of-life improvements for using the IQM exporter",
