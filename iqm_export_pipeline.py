@@ -93,7 +93,7 @@ class IQM_EXPORT_PIPELINE_OT_Export(Operator):
             self.report({"ERROR_INVALID_INPUT"}, repr(e))
             return {"CANCELLED"}
 
-        file_directory = os.path.abspath(settings.export_directory)
+        file_directory = bpy.path.abspath(settings.export_directory)
         file_name = settings.export_collection.iqm_export_pipeline_file_name
         file_extention = ".iqm"
 
